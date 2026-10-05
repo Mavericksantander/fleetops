@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PRÆTOR FleetOps | Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+<div class="app">
+<header class="header">
+<div>
+<div class="title">PRÆTOR FleetOps</div>
+<div class="subtitle">OPERATIONAL DASHBOARD</div>
+</div>
+<div class="connection">
+<span id="connectionIndicator"></span>
+<div>
+
+<span
+id="connectionText">
+
+CONNECTING
+
+</span>
+
+</div>
+
+
+</header>
+
+<nav class="dashboard-nav" aria-label="Secciones FleetOps">
+
+<button class="nav-button active" data-view="operationsView">
+OPERACIONES
+</button>
+
+<a class="nav-button" href="conductores.html">
+CONDUCTORES
+</a>
+
+
+<a class="nav-button" href="routes.html">
+RUTAS
+</a>
+
+<a class="nav-button" href="equipo.html">
+CONFIGURACIÓN · EQUIPO
+</a>
+
+</nav>
+
+
+<section id="operationsView" class="view-panel active">
+
+
+
+<section class="summary">
+
+
+<div class="summary-card">
+
+<div class="summary-label">
+UNIDADES
+</div>
+
+<div
+class="summary-value"
+id="totalUnits">
+
+0
+
+</div>
+
+</div>
+
+
+<div class="summary-card">
+
+<div class="summary-label">
+ACTIVAS
+</div>
+
+<div
+class="summary-value"
+id="activeUnits">
+
+0
+
+</div>
+
+</div>
+
+
+<div class="summary-card green">
+
+<div class="summary-label">
+EN RUTA
+</div>
+
+<div
+class="summary-value"
+id="routeUnits">
+
+0
+
+</div>
+
+</div>
+
+
+<div class="summary-card yellow">
+
+<div class="summary-label">
+ESPERANDO
+</div>
+
+<div
+class="summary-value"
+id="waitingUnits">
+
+0
+
+</div>
+
+</div>
+
+
+<div class="summary-card purple">
+
+<div class="summary-label">
+CARGANDO
+</div>
+
+<div
+class="summary-value"
+id="loadingUnits">
+
+0
+
+</div>
+
+</div>
+
+
+<div class="summary-card red">
+
+<div class="summary-label">
+INCIDENTES
+</div>
+
+<div
+class="summary-value"
+id="incidentUnits">
+
+0
+
+</div>
+
+</div>
+
+
+</section>
+
+
+<section class="toolbar">
+
+<div class="section-title">
+UNIDADES
+</div>
+
+
+<div class="last-update">
+
+ÚLTIMA ACTUALIZACIÓN
+
+<span id="lastUpdate">
+--
+</span>
+
+</div>
+
+</section>
+
+
+
+<section class="filters">
+
+
+<button
+class="filter-button active"
+data-filter="all">
+
+<span class="filter-dot all-dot"></span>
+
+TODOS
+
+<span
+class="filter-count"
+id="filterAllCount">
+
+0
+
+</span>
+
+</button>
+
+
+
+<button
+class="filter-button green-filter"
+data-filter="En ruta">
+
+<span class="filter-dot green-dot"></span>
+
+EN RUTA
+
+<span
+class="filter-count"
+id="filterRouteCount">
+
+0
+
+</span>
+
+</button>
+
+
+
+<button
+class="filter-button yellow-filter"
+data-filter="Esperando carga">
+
+<span class="filter-dot yellow-dot"></span>
+
+ESPERA CARGA
+
+<span
+class="filter-count"
+id="filterWaitingLoadCount">
+
+0
+
+</span>
+
+</button>
+
+
+
+<button
+class="filter-button purple-filter"
+data-filter="Cargando">
+
+<span class="filter-dot purple-dot"></span>
+
+CARGANDO
+
+<span
+class="filter-count"
+id="filterLoadingCount">
+
+0
+
+</span>
+
+</button>
+
+
+
+<button
+class="filter-button orange-filter"
+data-filter="Esperando descarga">
+
+<span class="filter-dot orange-dot"></span>
+
+ESPERA DESCARGA
+
+<span
+class="filter-count"
+id="filterWaitingUnloadCount">
+
+0
+
+</span>
+
+</button>
+
+
+
+<button
+class="filter-button blue-filter"
+data-filter="Descargando">
+
+<span class="filter-dot blue-dot"></span>
+
+DESCARGANDO
+
+<span
+class="filter-count"
+id="filterUnloadingCount">
+
+0
+
+</span>
+
+</button>
+
+
+
+<button
+class="filter-button gray-filter"
+data-filter="Finalizado">
+
+<span class="filter-dot gray-dot"></span>
+
+FINALIZADO
+
+<span
+class="filter-count"
+id="filterFinishedCount">
+
+0
+
+</span>
+
+</button>
+
+
+
+<button
+class="filter-button red-filter"
+data-filter="Incidente">
+
+<span class="filter-dot red-dot"></span>
+
+INCIDENTE
+
+<span
+class="filter-count"
+id="filterIncidentCount">
+
+0
+
+</span>
+
+</button>
+
+
+</section>
+
+
+
+<main
+id="fleetContainer"
+class="fleet-container">
+
+
+<div id="driverProfileModal" class="profile-modal" hidden>
+
+<div class="profile-dialog" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
+
+<div class="profile-dialog-header">
+<div>
+<div class="section-title" id="profileTitle">PERFIL DEL CONDUCTOR</div>
+<div class="profile-driver-id" id="profileDriverId">--</div>
+</div>
+<button type="button" class="profile-close" id="closeDriverProfile" aria-label="Cerrar perfil">×</button>
+</div>
+
+<div id="driverProfileContent"></div>
+
+</div>
+
+</div>
+
+
+<div class="empty-state">
+
+<div class="empty-code">
+WAIT
+</div>
+
+
+<div class="empty-title">
+ESPERANDO DATOS OPERACIONALES
+</div>
+
+
+<div class="empty-text">
+El dashboard está esperando conexión con la fuente de datos.
+</div>
+
+</div>
+
+
+</main>
+
+
+</section>
+
+
+<section id="driversView" class="view-panel" hidden>
+
+<section class="toolbar">
+
+<div class="section-title">
+CONDUCTORES
+</div>
+
+<div class="last-update">
+
+REGISTROS
+
+<span id="driverCount">
+0
+</span>
+
+</div>
+
+</section>
+
+
+<main id="driversContainer" class="drivers-container">
+
+<div class="empty-state">
+
+<div class="empty-code">
+WAIT
+</div>
+
+<div class="empty-title">
+ESPERANDO CONDUCTORES
+</div>
+
+<div class="empty-text">
+La vista está esperando conexión con la fuente de datos.
+</div>
+
+</div>
+
+</main>
+
+</section>
+
+
+
+<footer>
+
+PRÆTOR TECHNOLOGIES · FleetOps
+
+</footer>
+
+
+</div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/organization-context.js"></script>
+<script src="js/dashboard.js?v=4"></script>
+
+
+</body>
+
+</html>

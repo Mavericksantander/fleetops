@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PRÆTOR FleetOps | Acceso</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="login.css">
+</head>
+<body>
+<main class="login-shell">
+<section class="login-card" aria-labelledby="loginTitle">
+<div class="brand">PRÆTOR FleetOps</div>
+<div class="eyebrow">TORRE DE CONTROL</div>
+<h1 id="loginTitle">Inicio de sesión</h1>
+<p class="login-copy" id="loginCopy">Acceso para operadores de la operación.</p>
+
+<form id="loginForm">
+<label for="email">EMAIL</label>
+<input id="email" name="email" type="email" autocomplete="username" required>
+
+<label for="password">CONTRASEÑA</label>
+<input id="password" name="password" type="password" autocomplete="current-password" minlength="6" required>
+
+<button class="primary-button" id="emailButton" type="submit">INICIAR SESIÓN</button>
+</form>
+
+<div class="login-divider"><span>O</span></div>
+<button class="google-button" id="googleButton" type="button">
+<span class="google-mark">G</span>
+CONTINUAR CON GOOGLE
+</button>
+
+<div id="loginError" class="login-error" role="alert"></div>
+<button class="mode-button" id="modeButton" type="button">SIGN UP · CREAR CUENTA</button>
+
+<section id="organizationPanel" class="organization-panel" hidden aria-labelledby="organizationTitle">
+<div class="eyebrow">CONTEXTO OPERACIONAL</div>
+<h2 id="organizationTitle">Selecciona una organización</h2>
+<p class="organization-copy">Elige la organización que quieres abrir en la torre de control.</p>
+<div id="organizationList" class="organization-list"></div>
+<form id="organizationCreateForm" hidden>
+<label for="organizationName">NOMBRE DE EMPRESA</label>
+<input id="organizationName" name="organizationName" type="text" maxlength="120" autocomplete="organization" required>
+<button class="primary-button" id="organizationCreateButton" type="submit">CREAR EMPRESA</button>
+</form>
+<div id="organizationError" class="login-error" role="alert"></div>
+<button class="mode-button" id="organizationBackButton" type="button">VOLVER AL INICIO DE SESIÓN</button>
+</section>
+</section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/organization-context.js"></script>
+<script src="js/login.js?v=4"></script>
+</body>
+</html>

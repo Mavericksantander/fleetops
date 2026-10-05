@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PRÆTOR FleetOps | Conductores</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="dashboard.css">
+<link rel="stylesheet" href="conductores.css">
+</head>
+<body>
+<div class="app">
+<header class="header">
+<div>
+<div class="title">PRÆTOR FleetOps</div>
+<div class="subtitle">CONDUCTOR POOL</div>
+</div>
+<div class="connection">
+<span id="connectionIndicator"></span>
+<span id="connectionText">CONNECTING</span>
+</div>
+</header>
+
+<nav class="dashboard-nav" aria-label="Secciones FleetOps">
+<a class="nav-button" href="dashboard.html">OPERACIONES</a>
+<a class="nav-button active" href="conductores.html">CONDUCTORES</a>
+<a class="nav-button" href="routes.html">RUTAS</a>
+<a class="nav-button" href="equipo.html">CONFIGURACIÓN · EQUIPO</a>
+</nav>
+
+<section class="pool-toolbar">
+<div>
+<div class="section-title">CONDUCTORES</div>
+<div class="pool-subtitle">POOL OPERACIONAL POR RUTA</div>
+</div>
+<div class="last-update">MIS CONDUCTORES <span id="poolCount">0</span> · OPERATIVOS <span id="operationalCount">0</span></div>
+</section>
+
+<main id="routePool" class="route-pool">
+<div class="empty-state">
+<div class="empty-code">WAIT</div>
+<div class="empty-title">CARGANDO CONDUCTORES</div>
+<div class="empty-text">Esperando datos de conductores y operaciones.</div>
+</div>
+</main>
+
+<section class="completed-section">
+<div class="section-title">FINALIZADOS POR RUTA</div>
+<div class="pool-subtitle">HISTORIAL DE CONDUCTORES QUE COMPLETARON SU VIAJE</div>
+</section>
+<main id="completedPool" class="route-pool"></main>
+
+<div id="driverProfileModal" class="assignment-modal" hidden>
+<div class="assignment-dialog driver-profile-dialog" role="dialog" aria-modal="true" aria-labelledby="driverProfileTitle">
+<div class="assignment-header">
+<div>
+<div class="section-title" id="driverProfileTitle">PERFIL DEL CONDUCTOR</div>
+<div class="assignment-driver" id="driverProfileDriver">--</div>
+</div>
+<button type="button" class="assignment-close" id="closeDriverProfile" aria-label="Cerrar">×</button>
+</div>
+
+<div id="driverProfileContent" class="driver-profile-content">
+<div class="empty-state">
+<div class="empty-code">WAIT</div>
+<div class="empty-title">CARGANDO PERFIL</div>
+<div class="empty-text">Esperando datos del conductor y su equipo.</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div id="assignmentModal" class="assignment-modal" hidden>
+<div class="assignment-dialog" role="dialog" aria-modal="true" aria-labelledby="assignmentTitle">
+<div class="assignment-header">
+<div>
+<div class="section-title" id="assignmentTitle">ASIGNAR OPERACIÓN</div>
+<div class="assignment-driver" id="assignmentDriver">--</div>
+</div>
+<button type="button" class="assignment-close" id="closeAssignment" aria-label="Cerrar">×</button>
+</div>
+<form id="assignmentForm">
+<input type="hidden" id="assignmentConductorId">
+<label for="assignmentRoute">RUTA</label>
+<select id="assignmentRoute" name="route_id">
+<option value="">SIN RUTA ASIGNADA</option>
+</select>
+<input type="hidden" id="assignmentRouteName" name="ruta">
+<input type="hidden" id="assignmentCompany" name="empresa">
+<label for="assignmentState">ESTADO INICIAL</label>
+<select id="assignmentState" name="estado" required>
+<option value="Espera de reporte" selected>Espera de reporte</option>
+</select>
+<button type="submit" class="assignment-submit">CREAR VIAJE</button>
+<div id="assignmentError" class="assignment-error" role="alert"></div>
+</form>
+</div>
+</div>
+
+<footer>PRÆTOR TECHNOLOGIES · FleetOps</footer>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/organization-context.js"></script>
+<script src="js/conductores.js?v=999"></script>
+</body>
+</html>

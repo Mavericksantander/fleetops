@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PRÆTOR FleetOps | Equipo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="dashboard.css">
+<link rel="stylesheet" href="equipo.css">
+</head>
+<body>
+<div class="app">
+<header class="header">
+    <div><div class="title">PRÆTOR FleetOps</div><div class="subtitle">CONFIGURACIÓN · EQUIPO</div></div>
+    <a class="back-link" href="dashboard.html">VOLVER A OPERACIONES</a>
+</header>
+
+<main>
+    <section class="team-heading">
+        <div><div class="section-title">MIEMBROS</div><p class="team-copy">Administra los colaboradores de tu organización.</p></div>
+        <button class="primary-action" id="inviteButton" type="button" hidden>INVITAR COLABORADOR</button>
+    </section>
+    <div id="teamError" class="team-error" role="alert"></div>
+    <section id="teamList" class="team-list" aria-live="polite"></section>
+</main>
+
+<div id="inviteModal" class="team-modal" hidden>
+    <div class="team-dialog" role="dialog" aria-modal="true" aria-labelledby="inviteTitle">
+        <div class="dialog-header"><div class="section-title" id="inviteTitle">INVITAR COLABORADOR</div><button id="closeInviteButton" class="dialog-close" type="button" aria-label="Cerrar">×</button></div>
+        <form id="inviteForm">
+            <label for="inviteEmail">EMAIL</label>
+            <input id="inviteEmail" type="email" required autocomplete="email">
+            <label for="inviteRole">ROL</label>
+            <select id="inviteRole" required><option value="admin">Admin</option><option value="operator">Operator</option><option value="viewer">Viewer</option></select>
+            <button class="primary-action" id="generateInviteButton" type="submit">GENERAR INVITACIÓN</button>
+        </form>
+        <div id="inviteResult" class="invite-result" hidden>
+            <label for="inviteUrl">ENLACE DE INVITACIÓN</label>
+            <div class="invite-url-row"><input id="inviteUrl" readonly><button id="copyInviteButton" type="button">COPIAR ENLACE</button></div>
+        </div>
+        <div id="inviteError" class="team-error" role="alert"></div>
+    </div>
+</div>
+
+<footer>PRÆTOR TECHNOLOGIES · FleetOps</footer>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/organization-context.js"></script>
+<script src="js/equipo.js"></script>
+</body>
+</html>

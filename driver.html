@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>PRÆTOR FleetOps | Nuevo Conductor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A0D11;--panel:#12161C;--panel2:#171C24;--border:#28303b;
+  --white:#E9EDF2;--steel:#7C8798;--accent:#E9EDF2;
+  --green:#3E8F5C;--blue:#3E7FB0;--red:#C13B3B;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;min-height:100vh;
+  background:radial-gradient(circle at top,#18212b,#0A0D11 55%);
+  color:var(--white);font-family:Inter,Arial;
+  display:flex;justify-content:center;padding:20px;
+}
+.app{width:100%;max-width:430px;}
+.header{display:flex;margin-bottom:20px;}
+.title{font-family:Oswald;font-size:24px;letter-spacing:1px;}
+.subtitle{font-family:"JetBrains Mono";font-size:10px;color:var(--steel);letter-spacing:1.5px;margin-top:5px;}
+.card{background:var(--panel);border:1px solid var(--border);padding:16px;margin-bottom:14px;}
+label{display:block;font-family:"JetBrains Mono";font-size:10px;letter-spacing:1.2px;color:var(--steel);margin-bottom:6px;}
+input,select{
+  width:100%;background:var(--panel2);border:1px solid var(--border);
+  color:white;padding:13px;font-size:16px;margin-bottom:15px;
+  outline:none;font-family:inherit;
+}
+input:focus,select:focus{border-color:var(--accent);}
+.send{
+  width:100%;padding:16px;background:#2563eb;border:none;
+  color:white;font-size:16px;font-weight:700;cursor:pointer;
+}
+.send:disabled{opacity:.6;cursor:not-allowed;}
+.hint{font-family:"JetBrains Mono";font-size:9px;color:var(--steel);margin-top:-8px;margin-bottom:15px;letter-spacing:.6px;}
+.section-title{font-family:"JetBrains Mono";font-size:10px;letter-spacing:1.2px;color:var(--white);margin-bottom:16px;}
+.step-indicator{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px;}
+.step{padding:8px 4px;border:1px solid var(--border);color:var(--steel);font-family:"JetBrains Mono";font-size:9px;text-align:center;letter-spacing:.4px;}
+.step.active{border-color:var(--accent);color:var(--white);}
+.step-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.back-step{padding:16px;background:var(--panel2);border:1px solid var(--border);color:var(--white);font-weight:700;cursor:pointer;}
+.recover-button{width:100%;padding:12px;background:transparent;border:1px solid var(--border);color:var(--steel);font-family:"JetBrains Mono";font-size:10px;letter-spacing:.5px;cursor:pointer;}
+.recover-button:hover{border-color:var(--white);color:var(--white);}
+.camera-capture{display:grid;gap:10px;margin-bottom:18px;}
+.camera-select{margin-bottom:0;}
+.camera-preview{width:100%;display:none;background:#000;border:1px solid var(--border);aspect-ratio:4 / 3;object-fit:cover;}
+.camera-preview.active{display:block;}
+.camera-button{padding:13px;background:var(--panel2);border:1px solid var(--border);color:var(--white);font-weight:700;cursor:pointer;}
+.camera-button:disabled{opacity:.5;cursor:not-allowed;}
+.photo-preview{display:none;width:100%;max-height:180px;object-fit:cover;border:1px solid var(--green);}
+.photo-preview.active{display:block;}
+.footer{text-align:center;font-family:"JetBrains Mono";font-size:10px;color:var(--steel);margin-top:15px;}
+
+.success{background:var(--panel);border:1px solid var(--green);padding:24px;text-align:center;}
+.success-label{font-family:"JetBrains Mono";font-size:10px;color:var(--steel);letter-spacing:1.5px;margin-bottom:12px;}
+.success-id{
+  font-family:"JetBrains Mono";font-size:34px;font-weight:700;
+  letter-spacing:3px;color:var(--green);margin:10px 0 18px;
+}
+.success-name{font-size:14px;color:var(--white);margin-bottom:20px;}
+.copy-btn{
+  width:100%;padding:14px;background:var(--panel2);
+  border:1px solid var(--border);color:var(--white);
+  font-family:"JetBrains Mono";font-size:11px;letter-spacing:1px;
+  cursor:pointer;margin-bottom:12px;
+}
+.copy-btn:hover{border-color:var(--white);}
+.operation-btn{display:block;width:100%;padding:14px;background:#2563eb;color:white;text-decoration:none;font-family:"JetBrains Mono";font-size:11px;letter-spacing:1px;cursor:pointer;margin-bottom:12px;}
+.success-msg{font-size:12px;color:var(--steel);line-height:1.5;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div>
+      <div class="title">PRÆTOR FleetOps</div>
+      <div class="subtitle">DRIVER ONBOARDING</div>
+    </div>
+  </div>
+
+  <form id="driverForm">
+    <div id="inviteStatus" class="hint" role="status"></div>
+    <div class="step-indicator" aria-live="polite">
+      <span class="step active" data-step-indicator="1">1 IDENTIDAD</span>
+      <span class="step" data-step-indicator="2">2 LICENCIA</span>
+      <span class="step" data-step-indicator="3">3 EQUIPO</span>
+    </div>
+
+    <section class="onboarding-step active" data-step="1">
+      <div class="card">
+        <div class="section-title">IDENTIDAD FLEETOPS</div>
+      <label>NOMBRE COMPLETO</label>
+      <input name="nombre" placeholder="Nombre y apellido" required>
+
+      <label>RUT</label>
+      <input name="rut" placeholder="12.345.678-9" autocomplete="off" required>
+
+      <label>TELÉFONO</label>
+      <input name="telefono" type="tel" placeholder="+56 9 1234 5678" required>
+
+      <label>CIUDAD</label>
+      <input name="ciudad" placeholder="Antofagasta" required>
+
+      <button type="button" class="recover-button" id="recoverDriverButton">YA TENGO PERFIL · RECUPERAR</button>
+      </div>
+      <button type="button" class="send next-step">CONTINUAR</button>
+    </section>
+
+    <section class="onboarding-step" data-step="2" hidden>
+      <div class="card">
+        <div class="section-title">LICENCIA Y DOCUMENTACIÓN</div>
+        <label>TIPO DE LICENCIA</label>
+        <select name="tipo_licencia" required>
+          <option value="">Seleccionar...</option>
+          <option value="A1">A1</option>
+          <option value="A2">A2</option>
+          <option value="A3">A3</option>
+          <option value="A4">A4</option>
+          <option value="A5">A5</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+          <option value="D">D</option>
+          <option value="E">E</option>
+          <option value="F">F</option>
+        </select>
+
+        <label>NÚMERO DE LICENCIA</label>
+        <input name="licencia" placeholder="Número de licencia" required>
+
+        <label>VENCIMIENTO DE LICENCIA</label>
+        <input name="licencia_vencimiento" type="date" required>
+
+        <label>LICENCIA · FRENTE</label>
+        <div class="camera-capture" data-camera-side="frente">
+          <button type="button" class="camera-button start-camera">ABRIR CÁMARA</button>
+          <img class="photo-preview" alt="Vista previa del frente de la licencia">
+        </div>
+
+        <label>LICENCIA · REVERSO</label>
+        <div class="camera-capture" data-camera-side="reverso">
+          <button type="button" class="camera-button start-camera">ABRIR CÁMARA</button>
+          <img class="photo-preview" alt="Vista previa del reverso de la licencia">
+        </div>
+
+        <label>SELFIE DEL CONDUCTOR</label>
+        <div class="camera-capture" data-camera-side="selfie">
+          <button type="button" class="camera-button start-camera">ABRIR CÁMARA</button>
+          <img class="photo-preview" alt="Vista previa de la selfie del conductor">
+        </div>
+
+        <div class="camera-capture" id="cameraPanel" hidden>
+          <select class="camera-select" id="cameraSelect" aria-label="Seleccionar cámara"></select>
+          <video class="camera-preview" id="cameraPreview" autoplay playsinline></video>
+          <button type="button" class="camera-button" id="takePhoto">TOMAR FOTO</button>
+          <button type="button" class="camera-button" id="closeCamera">CERRAR CÁMARA</button>
+          <canvas id="cameraCanvas" hidden></canvas>
+        </div>
+
+      </div>
+      <div class="step-actions">
+        <button type="button" class="back-step">VOLVER</button>
+          <button type="button" class="send next-step">CONTINUAR</button>
+      </div>
+    </section>
+
+    <section class="onboarding-step" data-step="3" hidden>
+      <div class="card">
+        <div class="section-title">EQUIPO ACTUAL</div>
+
+        <label>PATENTE ACTUAL</label>
+        <input name="patente_habitual" placeholder="AB-CD-12" style="text-transform:uppercase" required>
+
+        <label>PERMISO DE CIRCULACIÓN</label>
+        <input name="permiso_circulacion" type="file" accept="image/*,.pdf" required>
+
+        <label>SOAP</label>
+        <input name="soap" type="file" accept="image/*,.pdf" required>
+
+        <label>REVISIÓN TÉCNICA / HOMOLOGACIÓN</label>
+        <input name="revision_tecnica" type="file" accept="image/*,.pdf" required>
+
+        <label>PADRÓN / CERTIFICADO DE INSCRIPCIÓN</label>
+        <input name="padron" type="file" accept="image/*,.pdf" required>
+      </div>
+      <div class="step-actions">
+        <button type="button" class="back-step">VOLVER</button>
+          <button type="submit" class="send">CONFIRMAR IDENTIDAD</button>
+      </div>
+    </section>
+  </form>
+
+  <div id="successScreen" style="display:none">
+    <div class="success">
+      <div class="success-label" id="driverIdMsg">TU DRIVER ID FLEETOPS</div>
+      <div class="success-id" id="driverIdValue">FLE-0000</div>
+      <div class="success-name" id="driverIdName">--</div>
+      <button class="copy-btn" id="copyBtn">COPIAR ID</button>
+      <a class="operation-btn" id="operationBtn" href="reportes.html">CONTINUAR A OPERACIÓN</a>
+      <div class="success-msg">
+        Guarda este ID. Con él podrás identificarte en cualquier operación
+        FleetOps, aunque cambies de empresa.
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">PRÆTOR TECHNOLOGIES · FleetOps</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/driver.js?v=3"></script>
+</body>
+</html>

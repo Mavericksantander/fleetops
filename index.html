@@ -1,0 +1,1225 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PRÆTOR TECHNOLOGIES | PRÆTOR FLEETOPS</title>
+    <meta
+      name="description"
+      content="PRÆTOR FLEETOPS es un sistema operacional para empresas de transporte y logística desarrollado por PRÆTOR TECHNOLOGIES."
+    />
+    <meta property="og:title" content="PRÆTOR FLEETOPS | Visibilidad operacional" />
+    <meta
+      property="og:description"
+      content="Seguimiento de unidades, viajes e incidentes para operaciones de transporte y logística."
+    />
+    <meta property="og:type" content="website" />
+
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap');
+
+      :root {
+        --ink: #e9edf2;
+        --muted: #7c8798;
+        --paper: #0a0d11;
+        --white: #12161c;
+        --panel2: #1a1f25;
+        --line: #28303b;
+        --green: #3e8f5c;
+        --lime: #e9edf2;
+        --orange: #c97a2e;
+      }
+
+      * { box-sizing: border-box; }
+
+      html { scroll-behavior: smooth; }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--paper);
+        font-family: Manrope, sans-serif;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .wrap {
+        width: min(1160px, calc(100% - 48px));
+        margin: auto;
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 26px 0;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+      }
+
+      .mark { display: none; }
+
+      .company-tag {
+        color: var(--muted);
+        font-family: "DM Mono", monospace;
+        font-size: 9px;
+        letter-spacing: 0.09em;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 28px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .nav-links a:hover { color: var(--ink); }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 46px;
+        padding: 0 20px;
+        color: var(--white);
+        background: var(--green);
+        border: 1px solid var(--green);
+        border-radius: 3px;
+        font-size: 12px;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      .button:hover { background: #327448; }
+
+      .eyebrow,
+      .mono {
+        color: var(--green);
+        font-family: "DM Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 0.9fr 1.1fr;
+        gap: 8vw;
+        align-items: center;
+        padding: 72px 0 106px;
+      }
+
+      h1 {
+        max-width: 600px;
+        margin: 20px 0;
+        font-size: clamp(46px, 6.4vw, 82px);
+        line-height: 0.98;
+        letter-spacing: -0.07em;
+      }
+
+      .hero-copy {
+        max-width: 470px;
+        margin: 0 0 30px;
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.7;
+      }
+
+      .actions {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        flex-wrap: wrap;
+      }
+
+      .link {
+        color: var(--green);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .link::after {
+        content: "  →";
+        font-size: 16px;
+      }
+
+      .note {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin-top: 50px;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .note::before {
+        width: 7px;
+        height: 7px;
+        background: var(--orange);
+        border-radius: 50%;
+        content: "";
+      }
+
+      .product-shot {
+        padding: 14px;
+        background: #12161c;
+        border: 1px solid #28303b;
+        box-shadow: 0 25px 65px rgba(0, 0, 0, 0.4);
+        transform: rotate(1.5deg);
+      }
+
+      .dots { height: 20px; }
+
+      .dots i {
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        margin-right: 4px;
+        background: #7c8798;
+        border-radius: 50%;
+      }
+
+      .console-dashboard {
+        display: grid;
+        grid-template-columns: 118px 1fr;
+        min-height: 360px;
+        color: #e9edf2;
+        background: #0a0d11;
+        border: 1px solid #28303b;
+      }
+
+      .console-side {
+        padding: 18px 11px;
+        background: #12161c;
+        border-right: 1px solid #28303b;
+      }
+
+      .console-side strong {
+        display: block;
+        margin-bottom: 25px;
+        color: #e9edf2;
+        font-size: 8px;
+        letter-spacing: 0.08em;
+      }
+
+      .console-side small {
+        display: block;
+        margin-bottom: 28px;
+        color: #7c8798;
+        font-family: "DM Mono", monospace;
+        font-size: 6px;
+        letter-spacing: 0.05em;
+      }
+
+      .console-side small::before {
+        display: inline-block;
+        width: 5px;
+        height: 5px;
+        margin-right: 4px;
+        background: #3e8f5c;
+        border-radius: 50%;
+        content: "";
+      }
+
+      .console-side span {
+        display: block;
+        margin: 15px 0;
+        color: #7c8798;
+        font-family: "DM Mono", monospace;
+        font-size: 7px;
+        letter-spacing: 0.04em;
+      }
+
+      .console-side .selected { color: #e9edf2; }
+
+      .console-main {
+        padding: 17px;
+        background: #0a0d11;
+      }
+
+      .console-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 15px;
+      }
+
+      .console-head h2 {
+        margin: 4px 0 0;
+        color: #e9edf2;
+        font-family: "Arial", sans-serif;
+        font-size: 17px;
+        letter-spacing: 0.04em;
+      }
+
+      .console-head .mono {
+        color: #7c8798;
+        font-size: 7px;
+      }
+
+      .console-live {
+        color: #3e8f5c;
+        font-family: "DM Mono", monospace;
+        font-size: 7px;
+      }
+
+      .console-summary {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 5px;
+        margin-bottom: 14px;
+      }
+
+      .console-metric {
+        min-height: 54px;
+        padding: 8px;
+        background: #12161c;
+        border: 1px solid #28303b;
+      }
+
+      .console-metric span {
+        display: block;
+        color: #7c8798;
+        font-family: "DM Mono", monospace;
+        font-size: 6px;
+      }
+
+      .console-metric b {
+        display: block;
+        margin-top: 7px;
+        color: #e9edf2;
+        font-family: "Arial", sans-serif;
+        font-size: 20px;
+      }
+
+      .console-metric.green b { color: #3e8f5c; }
+      .console-metric.yellow b { color: #c9a227; }
+      .console-metric.red b { color: #c13b3b; }
+
+      .console-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 12px 0 8px;
+        color: #e9edf2;
+        font-family: "DM Mono", monospace;
+        font-size: 8px;
+      }
+
+      .console-toolbar small {
+        color: #7c8798;
+        font-size: 6px;
+      }
+
+      .fleet-table {
+        overflow: hidden;
+        border: 1px solid #28303b;
+        background: #12161c;
+      }
+
+      .fleet-row {
+        display: grid;
+        grid-template-columns: 1.1fr 1fr 1.4fr 0.8fr;
+        gap: 8px;
+        align-items: center;
+        padding: 9px 10px;
+        border-bottom: 1px solid #1c222a;
+        font-size: 9px;
+      }
+
+      .fleet-row:last-child { border-bottom: 0; }
+
+      .fleet-row.head {
+        color: #7c8798;
+        font-family: "DM Mono", monospace;
+        font-size: 7px;
+        text-transform: uppercase;
+      }
+
+      .fleet-plate {
+        color: #e9edf2;
+        font-family: "DM Mono", monospace;
+      }
+
+      .fleet-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: #e9edf2;
+        font-family: "DM Mono", monospace;
+        font-size: 7px;
+      }
+
+      .fleet-status::before {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        content: "";
+      }
+
+      .fleet-status.ok::before { background: #3e8f5c; }
+      .fleet-status.wait::before { background: #c9a227; }
+      .fleet-status.alert::before { background: #c13b3b; }
+
+      .fleet-eta {
+        color: #7c8798;
+        font-family: "DM Mono", monospace;
+        font-size: 8px;
+        text-align: right;
+      }
+
+      .ribbon {
+        padding: 23px 0;
+        color: #7c8798;
+        background: #12161c;
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .ribbon .wrap {
+        display: flex;
+        justify-content: space-between;
+        gap: 25px;
+      }
+
+      .ribbon strong { color: var(--lime); }
+
+      .ribbon p {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .section { padding: 112px 0; }
+
+      .heading {
+        display: grid;
+        grid-template-columns: 0.75fr 1.25fr;
+        gap: 60px;
+        margin-bottom: 50px;
+      }
+
+      .section h2 {
+        max-width: 620px;
+        margin: 0;
+        font-size: clamp(34px, 4.6vw, 58px);
+        line-height: 1.02;
+        letter-spacing: -0.065em;
+      }
+
+      .intro {
+        max-width: 470px;
+        margin: 25px 0 0;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.75;
+      }
+
+      .features {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        border-top: 1px solid var(--line);
+      }
+
+      .feature {
+        min-height: 200px;
+        padding: 24px 20px 15px 0;
+        border-right: 1px solid var(--line);
+      }
+
+      .feature:not(:first-child) { padding-left: 20px; }
+      .feature:last-child { border: 0; }
+
+      .number {
+        color: var(--orange);
+        font-family: "DM Mono", monospace;
+        font-size: 10px;
+      }
+
+      .feature h3 {
+        margin: 32px 0 11px;
+        font-size: 16px;
+      }
+
+      .feature p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.7;
+      }
+
+      .problem {
+        background: #12161c;
+        border-bottom: 1px solid var(--line);
+        border-top: 1px solid var(--line);
+      }
+
+      .problem .section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10vw;
+        align-items: center;
+      }
+
+      .quote {
+        margin: 0;
+        font-size: clamp(30px, 4vw, 50px);
+        line-height: 1.05;
+        letter-spacing: -0.065em;
+      }
+
+      .problem p {
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.75;
+      }
+
+      .problem b { color: var(--ink); }
+
+      .sectors {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 9px;
+      }
+
+      .sector {
+        min-height: 130px;
+        padding: 18px;
+        background: var(--white);
+        border: 1px solid var(--line);
+      }
+
+      .sector span {
+        color: var(--green);
+        font-family: "DM Mono", monospace;
+        font-size: 10px;
+      }
+
+      .sector h3 {
+        margin: 45px 0 0;
+        font-size: 13px;
+        line-height: 1.3;
+      }
+
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .step {
+        min-height: 145px;
+        padding: 20px 15px 15px 0;
+        border-right: 1px solid var(--line);
+      }
+
+      .step:not(:first-child) { padding-left: 15px; }
+      .step:last-child { border: 0; }
+
+      .step b {
+        color: var(--orange);
+        font-family: "DM Mono", monospace;
+        font-size: 11px;
+      }
+
+      .step p {
+        margin: 37px 0 0;
+        font-size: 12px;
+        font-weight: 800;
+        line-height: 1.45;
+      }
+
+      .contact-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 60px;
+        align-items: start;
+      }
+
+      .contact-copy h2 {
+        margin: 14px 0 18px;
+        font-size: clamp(30px, 3.8vw, 46px);
+        letter-spacing: -0.04em;
+      }
+
+      .contact-copy p {
+        max-width: 420px;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.75;
+        margin: 0 0 28px;
+      }
+
+      .contact-detail {
+        margin-top: 34px;
+        padding-top: 24px;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 2;
+      }
+
+      .contact-detail a {
+        color: var(--ink);
+        font-weight: 700;
+      }
+
+      .form {
+        display: grid;
+        gap: 12px;
+      }
+
+      .form label {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--muted);
+        font-family: "DM Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .form input,
+      .form textarea {
+        width: 100%;
+        padding: 13px 14px;
+        color: var(--ink);
+        background: #12161c;
+        border: 1px solid var(--line);
+        border-radius: 3px;
+        font-family: Manrope, sans-serif;
+        font-size: 14px;
+      }
+
+      .form input:focus,
+      .form textarea:focus {
+        outline: 2px solid var(--green);
+        outline-offset: 1px;
+        border-color: var(--green);
+      }
+
+      .form textarea {
+        min-height: 105px;
+        resize: vertical;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .form-note {
+        margin: 2px 0 0;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.5;
+      }
+
+      .pricing-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 9px;
+      }
+
+      .pricing-card {
+        display: flex;
+        flex-direction: column;
+        min-height: 390px;
+        padding: 25px 20px 20px;
+        background: var(--white);
+        border: 1px solid var(--line);
+      }
+
+      .pricing-card.featured {
+        border-color: var(--green);
+        box-shadow: inset 0 3px 0 var(--green);
+      }
+
+      .pricing-label {
+        color: var(--green);
+        font-family: "DM Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+      }
+
+      .pricing-card h3 {
+        margin: 20px 0 8px;
+        font-size: 24px;
+        letter-spacing: -0.04em;
+      }
+
+      .pricing-price {
+        min-height: 42px;
+        margin: 0 0 20px;
+        color: var(--ink);
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .pricing-list {
+        display: grid;
+        gap: 12px;
+        margin: 0;
+        padding: 20px 0 28px;
+        border-top: 1px solid var(--line);
+        list-style: none;
+      }
+
+      .pricing-list li {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .pricing-list li::before {
+        margin-right: 8px;
+        color: var(--green);
+        content: "+";
+        font-family: "DM Mono", monospace;
+      }
+
+      .pricing-card .button {
+        width: 100%;
+        margin-top: auto;
+      }
+
+      .pricing-card:not(.featured) .button {
+        color: var(--ink);
+        background: transparent;
+        border-color: var(--line);
+      }
+
+      .pricing-card:not(.featured) .button:hover {
+        background: var(--panel2);
+        border-color: var(--ink);
+      }
+
+      .closing {
+        padding: 115px 24px;
+        color: var(--ink);
+        background: #06080a;
+        text-align: center;
+      }
+
+      .closing h2 {
+        max-width: 680px;
+        margin: 20px auto;
+        color: var(--ink);
+        font-size: clamp(38px, 5.5vw, 70px);
+        line-height: 1;
+        letter-spacing: -0.07em;
+      }
+
+      .closing p {
+        max-width: 430px;
+        margin: 0 auto 28px;
+        color: #aeb7c1;
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      .closing .button {
+        color: #e9edf2;
+        background: var(--green);
+        border-color: var(--green);
+      }
+
+      footer {
+        display: flex;
+        justify-content: space-between;
+        padding: 24px 0;
+        color: var(--muted);
+        font-family: "DM Mono", monospace;
+        font-size: 9px;
+      }
+
+      @media (max-width: 900px) {
+        .hero { grid-template-columns: 1fr; }
+
+        .product-shot {
+          max-width: 680px;
+          margin: auto;
+        }
+
+        .heading,
+        .problem .section,
+        .contact-grid {
+          grid-template-columns: 1fr;
+          gap: 25px;
+        }
+
+        .features { grid-template-columns: repeat(2, 1fr); }
+        .feature:nth-child(2) { border-right: 0; }
+        .feature:nth-child(n + 3) { border-top: 1px solid var(--line); }
+
+        .pricing-grid { grid-template-columns: 1fr; }
+        .pricing-card { min-height: 0; }
+
+        .sectors { grid-template-columns: repeat(3, 1fr); }
+        .steps { grid-template-columns: repeat(3, 1fr); }
+        .step:nth-child(3) { border-right: 0; }
+        .step:nth-child(n + 4) { border-top: 1px solid var(--line); }
+      }
+
+      @media (max-width: 600px) {
+        .wrap { width: calc(100% - 32px); }
+
+        .nav-links,
+        .company-tag { display: none; }
+
+        .nav .button {
+          min-height: 39px;
+          padding: 0 13px;
+          font-size: 10px;
+        }
+
+        .hero { padding: 48px 0 75px; }
+        .hero-copy { font-size: 15px; }
+        .product-shot,
+        .console-dashboard,
+        .console-main { min-width: 0; }
+
+        .product-shot {
+          padding: 8px;
+          transform: none;
+        }
+
+        .console-dashboard { grid-template-columns: 78px minmax(0, 1fr); }
+        .fleet-row {
+          grid-template-columns: 1fr 1fr;
+          row-gap: 4px;
+        }
+        .fleet-eta { text-align: left; }
+
+        .ribbon .wrap {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .section { padding: 78px 0; }
+
+        .features,
+        .sectors,
+        .steps,
+        .pricing-grid { grid-template-columns: 1fr; }
+
+        .feature,
+        .sector,
+        .step { border: 0; }
+        .feature,
+        .step { padding: 18px 0; }
+        .feature:not(:first-child) { padding-left: 0; }
+        .features,
+        .sectors,
+        .steps,
+        .pricing-grid { gap: 15px; }
+        .pricing-card { padding: 18px; }
+
+        .closing {
+          padding: 84px 16px;
+        }
+
+        .closing h2 { font-size: 38px; }
+        .form-row { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <nav class="nav wrap" aria-label="Navegación principal">
+      <a class="brand" href="index.html"><span class="mark">P</span> PRÆTOR FLEETOPS</a>
+      <span class="company-tag">SISTEMAS OPERACIONALES</span>
+      <div class="nav-links">
+        <a href="#producto">Producto</a>
+        <a href="#sectores">Sectores</a>
+        <a href="#como-funciona">Cómo funciona</a>
+      </div>
+      <a class="button" href="login.html">INICIAR SESIÓN</a>
+    </nav>
+
+    <main>
+      <section class="hero wrap">
+        <div>
+          <div class="eyebrow">PRÆTOR TECHNOLOGIES / Producto comercial</div>
+          <h1>Visibilidad operacional para tu flota.</h1>
+          <p class="hero-copy">
+            PRÆTOR FLEETOPS centraliza el seguimiento de unidades, viajes y eventos para que tu equipo sepa qué está ocurriendo en cada operación.
+          </p>
+          <div class="actions">
+            <a class="button" href="login.html">COMENZAR GRATIS</a>
+            <a class="link" href="mailto:praetortechnologies@protonmail.com?subject=Hablar%20sobre%20mi%20operaci%C3%B3n">Hablar sobre mi operación</a>
+          </div>
+          <div class="note">Implementa FleetOps según tus rutas, unidades y procesos.</div>
+        </div>
+
+        <div class="product-shot" aria-label="Reconstrucción visual del dashboard real de PRÆTOR FLEETOPS">
+          <div class="dots">
+            <i></i>
+            <i></i>
+            <i></i>
+          </div>
+
+          <div class="console-dashboard">
+            <aside class="console-side">
+              <strong>PRÆTOR FLEETOPS</strong>
+              <small>CONNECTED</small>
+              <span class="selected">OPERACIONES</span>
+              <span>CONDUCTORES</span>
+              <span>RUTAS</span>
+            </aside>
+
+            <div class="console-main">
+              <div class="console-head">
+                <div>
+                  <div class="mono">OPERATIONAL DASHBOARD</div>
+                  <h2>UNIDADES</h2>
+                </div>
+                <span class="console-live">● CONNECTED</span>
+              </div>
+
+              <div class="console-summary">
+                <div class="console-metric"><span>UNIDADES</span><b>24</b></div>
+                <div class="console-metric"><span>ACTIVAS</span><b>18</b></div>
+                <div class="console-metric green"><span>EN RUTA</span><b>14</b></div>
+                <div class="console-metric yellow"><span>ESPERANDO</span><b>03</b></div>
+                <div class="console-metric"><span>CARGANDO</span><b>05</b></div>
+                <div class="console-metric red"><span>INCIDENTES</span><b>02</b></div>
+              </div>
+
+              <div class="console-toolbar">
+                <span>UNIDADES</span>
+                <small>ÚLTIMA ACTUALIZACIÓN 14:32</small>
+              </div>
+
+              <div class="fleet-table">
+                <div class="fleet-row head">
+                  <span>UNIDAD</span>
+                  <span>ESTADO</span>
+                  <span>RUTA</span>
+                  <span>ETA</span>
+                </div>
+                <div class="fleet-row">
+                  <span class="fleet-plate">TRK-047</span>
+                  <span class="fleet-status ok">EN RUTA</span>
+                  <span>Planta / Puerto</span>
+                  <span class="fleet-eta">42 min</span>
+                </div>
+                <div class="fleet-row">
+                  <span class="fleet-plate">TRK-012</span>
+                  <span class="fleet-status wait">ESPERANDO</span>
+                  <span>Zona de carga</span>
+                  <span class="fleet-eta">--</span>
+                </div>
+                <div class="fleet-row">
+                  <span class="fleet-plate">TRK-089</span>
+                  <span class="fleet-status ok">EN RUTA</span>
+                  <span>Ruta principal</span>
+                  <span class="fleet-eta">1h 05</span>
+                </div>
+                <div class="fleet-row">
+                  <span class="fleet-plate">TRK-023</span>
+                  <span class="fleet-status alert">INCIDENTE</span>
+                  <span>En revisión</span>
+                  <span class="fleet-eta">--</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="problem">
+        <div class="section wrap">
+          <blockquote class="quote">¿Tu operación todavía depende de WhatsApp, llamadas y planillas?</blockquote>
+          <p>
+            Cuando los estados están dispersos, el equipo pierde tiempo buscando información y la operación se vuelve difícil de controlar.<br /><br />
+            <b>PRÆTOR FLEETOPS centraliza la información operacional en un solo lugar.</b>
+          </p>
+        </div>
+      </section>
+
+      <section class="ribbon">
+        <div class="wrap">
+          <p><strong>La información operacional también es infraestructura.</strong> Convierte cada evento en una decisión.</p>
+          <span class="mono">PRÆTOR / SYSTEM 01</span>
+        </div>
+      </section>
+
+      <section class="section wrap" id="producto">
+        <div class="heading">
+          <div>
+            <div class="eyebrow">Sistema operacional / FLEETOPS</div>
+          </div>
+          <div>
+            <h2>Todo lo que necesitas para controlar una operación de transporte.</h2>
+            <p class="intro">
+              PRÆTOR FLEETOPS reúne el seguimiento de unidades, los estados de viaje, los eventos y el historial operacional de tu empresa.
+            </p>
+          </div>
+        </div>
+
+        <div class="features">
+          <article class="feature">
+            <span class="number">01</span>
+            <h3>Seguimiento de unidades</h3>
+            <p>Conoce el estado de cada camión y viaje sin depender de llamadas.</p>
+          </article>
+          <article class="feature">
+            <span class="number">02</span>
+            <h3>Estados de viaje</h3>
+            <p>Registra carga, espera, descarga, incidentes y finalización.</p>
+          </article>
+          <article class="feature">
+            <span class="number">03</span>
+            <h3>Historial operacional</h3>
+            <p>Reconstruye lo ocurrido durante cada operación con información trazable.</p>
+          </article>
+          <article class="feature">
+            <span class="number">04</span>
+            <h3>Reportes y usuarios</h3>
+            <p>Gestiona la operación, la flota, los roles y la información para decidir.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section wrap">
+        <div class="heading">
+          <div>
+            <div class="eyebrow">Implementación</div>
+          </div>
+          <div>
+            <h2>Adaptado a la operación que ya tienes.</h2>
+            <p class="intro">
+              PRÆTOR FLEETOPS se configura según tus rutas, unidades, roles y procesos operacionales. Puedes comenzar con una operación específica y ampliar posteriormente a toda tu flota.
+            </p>
+          </div>
+        </div>
+
+        <div class="features">
+          <article class="feature">
+            <span class="number">01</span>
+            <h3>Define tu operación</h3>
+            <p>Partimos de tus rutas, unidades y etapas reales.</p>
+          </article>
+          <article class="feature">
+            <span class="number">02</span>
+            <h3>Configura roles</h3>
+            <p>Cada equipo accede a la información que necesita.</p>
+          </article>
+          <article class="feature">
+            <span class="number">03</span>
+            <h3>Comienza por una operación</h3>
+            <p>Implementa por etapas sin detener tu operación.</p>
+          </article>
+          <article class="feature">
+            <span class="number">04</span>
+            <h3>Amplía con control</h3>
+            <p>Extiende el sistema a toda tu flota cuando estés listo.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section wrap" id="sectores">
+        <div class="heading">
+          <div>
+            <div class="eyebrow">Para quién es FleetOps</div>
+          </div>
+          <div>
+            <h2>Para empresas que necesitan controlar una operación concreta.</h2>
+          </div>
+        </div>
+
+        <div class="sectors">
+          <article class="sector">
+            <span>01</span>
+            <h3>Empresas de transporte</h3>
+          </article>
+          <article class="sector">
+            <span>02</span>
+            <h3>Operaciones mineras</h3>
+          </article>
+          <article class="sector">
+            <span>03</span>
+            <h3>Logística industrial</h3>
+          </article>
+          <article class="sector">
+            <span>04</span>
+            <h3>Transporte hacia y desde puertos</h3>
+          </article>
+          <article class="sector">
+            <span>05</span>
+            <h3>Flotas propias o tercerizadas</h3>
+          </article>
+        </div>
+      </section>
+
+      <section class="section wrap" id="como-funciona">
+        <div class="heading">
+          <div>
+            <div class="eyebrow">Cómo funciona</div>
+          </div>
+          <div>
+            <h2>De la asignación al historial, sin perder el hilo.</h2>
+          </div>
+        </div>
+
+        <div class="steps">
+          <div class="step"><b>01</b><p>Configura tu operación</p></div>
+          <div class="step"><b>02</b><p>Registra unidades</p></div>
+          <div class="step"><b>03</b><p>Asigna viajes</p></div>
+          <div class="step"><b>04</b><p>Conductores reportan estados</p></div>
+          <div class="step"><b>05</b><p>Tu equipo monitorea</p></div>
+          <div class="step"><b>06</b><p>PRÆTOR FLEETOPS genera historial</p></div>
+        </div>
+      </section>
+
+      <section class="section wrap" id="planes">
+        <div class="heading">
+          <div>
+            <div class="eyebrow">Planes FleetOps</div>
+          </div>
+          <div>
+            <h2>Comienza con el tamaño de operación que necesitas.</h2>
+            <p class="intro">
+              Prueba FleetOps con un plan Starter de 14 días y conversa con PRÆTOR cuando tu operación necesite más capacidad.
+            </p>
+          </div>
+        </div>
+
+        <div class="pricing-grid">
+          <article class="pricing-card featured">
+            <span class="pricing-label">PARA COMENZAR</span>
+            <h3>STARTER</h3>
+            <p class="pricing-price">Gratis durante 14 días</p>
+            <ul class="pricing-list">
+              <li>Hasta 10 conductores</li>
+              <li>Hasta 3 operadores</li>
+              <li>Hasta 5 rutas</li>
+            </ul>
+            <a class="button" href="login.html">COMENZAR GRATIS</a>
+          </article>
+
+          <article class="pricing-card">
+            <span class="pricing-label">PARA CRECER</span>
+            <h3>PRO</h3>
+            <p class="pricing-price">Precio próximamente</p>
+            <ul class="pricing-list">
+              <li>Mayor capacidad operacional</li>
+              <li>Funciones avanzadas</li>
+            </ul>
+            <a class="button" href="mailto:praetortechnologies@protonmail.com?subject=Hablar%20sobre%20FleetOps%20Pro">HABLAR CON PRÆTOR</a>
+          </article>
+
+          <article class="pricing-card">
+            <span class="pricing-label">PARA ESCALA</span>
+            <h3>ENTERPRISE</h3>
+            <p class="pricing-price">Precio a medida</p>
+            <ul class="pricing-list">
+              <li>Operaciones de mayor escala</li>
+              <li>Integraciones y capacidades empresariales</li>
+            </ul>
+            <a class="button" href="mailto:praetortechnologies@protonmail.com?subject=Contactar%20sobre%20FleetOps%20Enterprise">CONTACTAR</a>
+          </article>
+        </div>
+      </section>
+
+      <section class="section wrap" id="contacto">
+        <div class="contact-grid">
+          <div class="contact-copy">
+            <div class="eyebrow">PRÆTOR FLEETOPS / Contacto</div>
+            <h2>Hablemos sobre tu operación.</h2>
+            <p>
+              Cuéntanos qué necesitas controlar, cuántas unidades tienes y dónde se concentra hoy la fricción operacional.
+            </p>
+            <div class="contact-detail">
+              Escríbenos directamente<br />
+              <a href="mailto:praetortechnologies@protonmail.com">praetortechnologies@protonmail.com</a><br />
+              PRÆTOR TECHNOLOGIES
+            </div>
+          </div>
+
+          <form class="form" id="fleetops-contact-form">
+            <div class="form-row">
+              <div>
+                <label for="contact-name">Nombre</label>
+                <input id="contact-name" name="name" type="text" required />
+              </div>
+              <div>
+                <label for="contact-company">Empresa</label>
+                <input id="contact-company" name="company" type="text" required />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div>
+                <label for="contact-email">Email</label>
+                <input id="contact-email" name="email" type="email" required />
+              </div>
+              <div>
+                <label for="contact-fleet">Tamaño de flota</label>
+                <input id="contact-fleet" name="fleet" type="text" placeholder="Ej: 24 unidades" />
+              </div>
+            </div>
+
+            <div>
+              <label for="contact-message">Tu operación</label>
+              <textarea id="contact-message" name="message" placeholder="Qué transportan y qué necesitan controlar"></textarea>
+            </div>
+
+            <button class="button" type="submit">Hablar sobre mi operación</button>
+            <p class="form-note">
+              Se abrirá tu cliente de correo con el mensaje dirigido a praetortechnologies@protonmail.com.
+            </p>
+          </form>
+        </div>
+      </section>
+
+      <section class="closing">
+        <div class="eyebrow">PRÆTOR TECHNOLOGIES / Implementación</div>
+        <h2>Lleva tu operación a FleetOps.</h2>
+        <p>Cuéntanos qué operación necesitas controlar y conversemos sobre cómo implementarla.</p>
+        <a class="button" href="#contacto">Quiero implementar FleetOps</a>
+      </section>
+    </main>
+
+    <footer class="wrap">
+      <span>© 2026 PRÆTOR TECHNOLOGIES</span>
+      <span>SISTEMAS OPERACIONALES · PRÆTOR FLEETOPS</span>
+    </footer>
+
+    <script>
+      document.getElementById('fleetops-contact-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        var form = new FormData(event.target);
+        var subject = 'Hablar sobre mi operación - ' + form.get('company');
+        var body = [
+          'Nombre: ' + form.get('name'),
+          'Empresa: ' + form.get('company'),
+          'Email: ' + form.get('email'),
+          'Tamaño de flota: ' + (form.get('fleet') || '--'),
+          '',
+          'Operación:',
+          form.get('message') || '--'
+        ].join('
+');
+
+        window.location.href = 'mailto:praetortechnologies@protonmail.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+      });
+    </script>
+  </body>
+</html>

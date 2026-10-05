@@ -1,0 +1,27 @@
+# Local Supabase configuration (never commit real credentials)
+js/supabase-config.js
+supabase-config.js
+.env
+.env.*
+!.env.example
+*service-role*
+*service_role*
+*.pem
+*.key
+
+# Dependencies and local tooling
+node_modules/
+.vscode/
+.idea/
+
+# Operating system files
+.DS_Store
+
+# Local editor and backup files
+*.swp
+*.swo
+*~
+*.bak
+*.backup
+*.bak[0-9]*
+*.before-*

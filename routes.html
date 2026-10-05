@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PRÆTOR FleetOps | Rutas</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="dashboard.css">
+<link rel="stylesheet" href="routes.css?v=2">
+</head>
+<body>
+<div class="app">
+<header class="header"><div><div class="title">PRÆTOR FleetOps</div><div class="subtitle">OPERATION CONFIGURATION</div></div></header>
+<nav class="dashboard-nav"><a class="nav-button" href="dashboard.html">OPERACIONES</a><a class="nav-button" href="conductores.html">CONDUCTORES</a><a class="nav-button active" href="routes.html">RUTAS</a><a class="nav-button" href="equipo.html">CONFIGURACIÓN · EQUIPO</a></nav>
+<section class="route-layout">
+<div class="route-panel"><div class="section-title">NUEVA RUTA</div><form id="routeForm"><label for="organizationSelect">ORGANIZACIÓN</label><select id="organizationSelect" required></select><label for="routeName">RUTA</label><input id="routeName" required placeholder="Ej. Coya Sur ↔ Puerto Angamos"><button class="primary-action" type="submit">CREAR RUTA</button><div id="routeError" class="route-error"></div></form></div>
+</section>
+<section class="route-list-header"><div class="section-title">RUTAS CONFIGURADAS</div></section>
+<main id="routesContainer" class="routes-container"><div class="empty-state"><div class="empty-title">CARGANDO RUTAS</div></div></main>
+<footer>PRÆTOR TECHNOLOGIES · FleetOps</footer>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/supabase-config.js"></script><script src="js/supabase.js"></script><script src="js/organization-context.js"></script><script src="js/routes.js?v=2"></script>
+</body>
+</html>

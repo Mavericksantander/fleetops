@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>PRÆTOR FleetOps QR</title>
+
+
+<style>
+
+body{
+
+background:#0A0D11;
+
+color:white;
+
+font-family:Arial,sans-serif;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+height:100vh;
+
+margin:0;
+
+}
+
+
+.card{
+
+text-align:center;
+
+background:#12161C;
+
+padding:40px;
+
+border:1px solid #28303b;
+
+}
+
+
+h1{
+
+font-size:24px;
+
+}
+
+
+#qrcode{
+
+background:white;
+
+padding:20px;
+
+display:inline-block;
+
+margin:20px;
+
+}
+
+
+button{
+
+padding:12px 20px;
+
+background:#2563eb;
+
+border:none;
+
+color:white;
+
+cursor:pointer;
+
+font-size:16px;
+
+}
+
+
+</style>
+
+
+</head>
+
+
+<body>
+
+
+<div class="card">
+
+
+<h1>
+PRÆTOR FleetOps
+</h1>
+
+
+<p>
+Escanea para actualizar ruta
+</p>
+
+
+<div id="qrcode"></div>
+
+
+<br>
+
+
+<button onclick="downloadQR()">
+Descargar QR
+</button>
+
+
+</div>
+
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+
+<script>
+
+
+const params = new URLSearchParams(window.location.search);
+const viajeId = params.get("viaje") || "";
+const url = viajeId
+    ? `https://praetor-fleetops.netlify.app/reportes.html?viaje=${encodeURIComponent(viajeId)}`
+    : "https://praetor-fleetops.netlify.app/reportes.html";
+
+
+const qr = new QRCode(
+document.getElementById("qrcode"),
+{
+
+text:url,
+
+width:300,
+
+height:300,
+
+colorDark:"#000000",
+
+colorLight:"#ffffff",
+
+correctLevel:QRCode.CorrectLevel.H
+
+}
+
+);
+
+
+
+
+
+function downloadQR(){
+
+
+const img =
+document.querySelector("#qrcode img");
+
+
+const link =
+document.createElement("a");
+
+
+link.href =
+img.src;
+
+
+link.download =
+"praetor-fleetops-qr.png";
+
+
+link.click();
+
+
+}
+
+
+</script>
+
+
+</body>
+
+</html>
