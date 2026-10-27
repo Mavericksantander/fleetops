@@ -237,6 +237,15 @@ async function getTripById(tripId){
                 error
             );
 
+            const {
+                data: sessionData
+            } =
+                await supabaseClient.auth.getSession();
+
+            if(!sessionData?.session){
+                return null;
+            }
+
             const fallback =
                 await supabaseClient
                     .from("viajes")
@@ -463,12 +472,6 @@ async function getConductorByPhone(telefono){
     }
 
 
-    console.log(
-        "BUSCANDO CONDUCTOR POR TELÉFONO:",
-        telefono
-    );
-
-
     const {
 
         data,
@@ -501,20 +504,10 @@ async function getConductorByPhone(telefono){
 
     if(!data){
 
-        console.log(
-            "CONDUCTOR NO REGISTRADO:",
-            telefono
-        );
 
         return null;
 
     }
-
-
-    console.log(
-        "CONDUCTOR ENCONTRADO:",
-        data
-    );
 
 
     return data;
@@ -529,11 +522,6 @@ async function getConductorByPhone(telefono){
 async function getActiveTrip(
     patente
 ){
-
-    console.log(
-        "BUSCANDO VIAJE ACTIVO PARA:",
-        patente
-    );
 
 
     const {
@@ -588,10 +576,6 @@ async function getActiveTrip(
         data.length === 0
     ){
 
-        console.log(
-            "NO EXISTE VIAJE ACTIVO PARA:",
-            patente
-        );
 
         return null;
 
@@ -600,12 +584,6 @@ async function getActiveTrip(
 
     const trip =
         data[0];
-
-
-    console.log(
-        "VIAJE ACTIVO ENCONTRADO:",
-        trip
-    );
 
 
     return trip;
@@ -630,11 +608,6 @@ async function createTrip({
     timestamp
 
 }){
-
-    console.log(
-        "CREANDO NUEVO VIAJE PARA:",
-        patente
-    );
 
 
     const {
@@ -704,12 +677,6 @@ async function createTrip({
     }
 
 
-    console.log(
-        "NUEVO VIAJE CREADO:",
-        data
-    );
-
-
     return data;
 
 }
@@ -741,10 +708,7 @@ async function getOrCreateTrip({
             await getTripById(trip_id);
 
         if(resolvedTrip){
-            console.log(
-                "USANDO VIAJE RESUELTO POR CONTEXTO:",
-                resolvedTrip.id
-            );
+
             return resolvedTrip;
         }
     }
@@ -767,20 +731,11 @@ async function getOrCreateTrip({
             );
         }
 
-        console.log(
-            "REUTILIZANDO VIAJE ACTIVO:",
-            activeTrip.id
-        );
-
 
         return activeTrip;
 
     }
 
-
-    console.log(
-        "NO HAY VIAJE ACTIVO. INICIANDO NUEVO VIAJE."
-    );
 
     if(!empresa || !ruta){
         throw new Error(
@@ -831,11 +786,6 @@ async function finalizeTrip(
     viajeId
 ){
 
-    console.log(
-        "FINALIZANDO VIAJE MEDIANTE RPC:",
-        viajeId
-    );
-
 
     const {
 
@@ -852,15 +802,6 @@ async function finalizeTrip(
                         viajeId
                 }
             );
-
-
-    console.log(
-        "RESPUESTA FINALIZACIÓN:",
-        {
-            data,
-            error
-        }
-    );
 
 
     if(error){
@@ -885,12 +826,6 @@ async function finalizeTrip(
         );
 
     }
-
-
-    console.log(
-        "VIAJE FINALIZADO CORRECTAMENTE:",
-        data
-    );
 
 
     return data;
@@ -968,11 +903,6 @@ fleetForm.addEventListener(
     async function(event){
 
         event.preventDefault();
-
-
-        console.log(
-            "FLEETOPS SUBMIT INTERCEPTADO"
-        );
 
 
         const submitButton =
@@ -1091,7 +1021,6 @@ fleetForm.addEventListener(
                 fleetForm.elements["incident_category"]?.value || null;
 
 
-
             // =========================================
             // VALIDACIÓN
             // =========================================
@@ -1141,7 +1070,6 @@ fleetForm.addEventListener(
                 return;
 
             }
-
 
 
             // =========================================
@@ -1253,7 +1181,6 @@ fleetForm.addEventListener(
             );
 
 
-
             // =========================================
             // OBTENER / CREAR VIAJE
             // =========================================
@@ -1303,13 +1230,6 @@ fleetForm.addEventListener(
 
             const viajeId =
                 trip.id;
-
-
-            console.log(
-                "VIAJE_ID ASIGNADO:",
-                viajeId
-            );
-
 
 
             // =========================================
@@ -1372,20 +1292,9 @@ fleetForm.addEventListener(
             };
 
 
-            console.log(
-                "REPORTE PREPARADO:",
-                report
-            );
-
-
-
             // =========================================
             // INSERTAR REPORTE
             // =========================================
-
-            console.log(
-                "INSERTANDO REPORTE EN SUPABASE..."
-            );
 
 
             const {
@@ -1406,15 +1315,6 @@ fleetForm.addEventListener(
                     .select();
 
 
-            console.log(
-                "RESPUESTA SUPABASE:",
-                {
-                    data,
-                    error
-                }
-            );
-
-
             if(error){
 
                 throw new Error(
@@ -1423,7 +1323,6 @@ fleetForm.addEventListener(
                 );
 
             }
-
 
 
             // =========================================
@@ -1449,10 +1348,6 @@ fleetForm.addEventListener(
             // =========================================
             // SUCCESS
             // =========================================
-
-            console.log(
-                "REDIRIGIENDO A success.html"
-            );
 
 
             window.location.replace(
