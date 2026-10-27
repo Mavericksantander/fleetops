@@ -333,6 +333,15 @@ if (recoverDriverButton) {
 }
 
 
+async function sha256Hex(value) {
+  const encoded = new TextEncoder().encode(value);
+  const digest = await crypto.subtle.digest("SHA-256", encoded);
+
+  return Array.from(new Uint8Array(digest), function (byte) {
+    return byte.toString(16).padStart(2, "0");
+  }).join("");
+}
+
 async function uploadDocument(file, storagePath) {
   if (!file) {
     throw new Error("Archivo requerido.");
@@ -341,13 +350,15 @@ async function uploadDocument(file, storagePath) {
   const { error } = await supabaseClient.storage
     .from("fleetops-documents")
     .upload(storagePath, file, {
-      contentType: file.type || "application/octet-stream",
-      upsert: true
+      contentType: file.type || "application/octet-stream"
     });
 
   if (error) {
+    const denied = /row-level security|unauthorized/i.test(error.message || "");
     throw new Error(
-      `No se pudo subir ${file.name}: ${error.message}`
+      denied
+        ? "La invitación no permite subir documentos. Pide un enlace nuevo."
+        : `No se pudo subir ${file.name}: ${error.message}`
     );
   }
 
@@ -476,12 +487,6 @@ driverForm.addEventListener(
             // BUSCAR EXISTENTE
             // =========================================
 
-            console.log(
-                "DRIVER: verificando RUT",
-                rut
-            );
-
-
             const equipmentDocuments = [
                 {
                     tipoDocumento: "permiso_circulacion",
@@ -505,17 +510,22 @@ driverForm.addEventListener(
                 }
             ];
 
-            const onboardingStorageId = crypto.randomUUID();
+            const onboardingPrefix =
+                "onboarding/" + await sha256Hex(inviteToken);
             const tractoDocumentMetadata = [];
 
             for (const document of equipmentDocuments) {
-                const extension =
+                const rawExtension =
                     document.file.name.includes(".")
                         ? document.file.name.split(".").pop().toLowerCase()
                         : "bin";
+                const extension =
+                    /^[a-z0-9]+$/.test(rawExtension)
+                        ? rawExtension
+                        : "bin";
 
                 const storagePath =
-                    `onboarding/${onboardingStorageId}/equipment/${document.folder}/${crypto.randomUUID()}.${extension}`;
+                    `${onboardingPrefix}/equipment/${document.folder}/${crypto.randomUUID()}.${extension}`;
 
                 await uploadDocument(
                     document.file,
@@ -552,15 +562,6 @@ driverForm.addEventListener(
             const conductorDocumentMetadata = [];
 
             for (const document of driverDocuments) {
-                console.log(
-                    "DRIVER DOCUMENT DEBUG:",
-                    document.tipoDocumento,
-                    document.blob,
-                    document.blob instanceof Blob,
-                    document.blob?.type,
-                    document.blob?.size
-                );
-
                 const file = new File(
                     [document.blob],
                     `${document.tipoDocumento}.jpg`,
@@ -570,7 +571,7 @@ driverForm.addEventListener(
                 );
 
                 const storagePath =
-                    `onboarding/${onboardingStorageId}/drivers/${document.folder}/${crypto.randomUUID()}.jpg`;
+                    `${onboardingPrefix}/drivers/${document.folder}/${crypto.randomUUID()}.jpg`;
 
                 await uploadDocument(
                     file,
