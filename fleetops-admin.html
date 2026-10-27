@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PRÆTOR FleetOps | Administración global</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="dashboard.css">
+<link rel="stylesheet" href="fleetops-admin.css">
+</head>
+<body>
+<div class="app">
+    <header class="header admin-header">
+        <a class="admin-brand" href="fleetops-admin.html" aria-label="FleetOps administración global">
+            <span>
+                <span class="title">PRÆTOR FleetOps</span>
+                <span class="subtitle">ADMINISTRACIÓN GLOBAL</span>
+            </span>
+        </a>
+        <div class="admin-header-actions">
+            <span class="admin-access-badge"><span></span> OWNER DE PLATAFORMA</span>
+            <button class="admin-logout" id="logoutButton" type="button">CERRAR SESIÓN</button>
+        </div>
+    </header>
+
+    <main class="admin-main">
+        <section class="admin-page-heading">
+            <div>
+                <div class="admin-eyebrow">CENTRO DE CONTROL</div>
+                <h1>Administración de empresas</h1>
+                <p>Gestiona el acceso inicial de cada organización en FleetOps.</p>
+            </div>
+            <div class="admin-stats" aria-label="Resumen">
+                <article class="admin-stat">
+                    <span class="admin-stat-label">ORGANIZACIONES</span>
+                    <strong id="organizationCount">--</strong>
+                </article>
+                <article class="admin-stat">
+                    <span class="admin-stat-label">INVITACIONES PENDIENTES</span>
+                    <strong id="pendingInviteCount">--</strong>
+                </article>
+            </div>
+        </section>
+
+        <section class="admin-provision-section" aria-labelledby="provisionTitle">
+            <div class="admin-section-heading">
+                <div class="admin-section-icon" aria-hidden="true">01</div>
+                <div>
+                    <h2 id="provisionTitle">Dar acceso a una empresa</h2>
+                    <p>Crea la organización e invita a la persona que será su primer owner.</p>
+                </div>
+            </div>
+            <form id="provisionForm" class="admin-form">
+                <div class="admin-field">
+                    <label for="organizationName">NOMBRE DE LA EMPRESA</label>
+                    <input id="organizationName" name="organizationName" type="text" maxlength="120" placeholder="Ej. Hansa Bodegas y Logística" required>
+                </div>
+                <div class="admin-field">
+                    <label for="ownerEmail">EMAIL DEL PRIMER OWNER</label>
+                    <input id="ownerEmail" name="ownerEmail" type="email" maxlength="254" autocomplete="email" placeholder="nombre@empresa.cl" required>
+                </div>
+                <button class="primary-action" id="provisionButton" type="submit">
+                    <span>CREAR EMPRESA</span>
+                    <span aria-hidden="true">→</span>
+                </button>
+            </form>
+            <p class="admin-form-note">La invitación se genera aquí para compartirla manualmente; no se envía correo automático.</p>
+        </section>
+
+        <div id="adminError" class="admin-error" role="alert"></div>
+        <div id="invitePanel" class="admin-invite" hidden>
+            <div class="admin-invite-icon" aria-hidden="true">✓</div>
+            <div class="admin-invite-content">
+                <strong id="inviteMessage"></strong>
+                <p>Comparte este enlace con el primer owner. Expira en 7 días.</p>
+            </div>
+            <div class="admin-invite-row">
+                <input id="inviteUrl" type="text" readonly aria-label="Enlace de invitación">
+                <button class="primary-action" id="copyInviteButton" type="button">COPIAR ENLACE</button>
+            </div>
+        </div>
+
+        <section class="admin-organizations">
+            <div class="admin-section-heading admin-organizations-heading">
+                <div class="admin-section-icon" aria-hidden="true">02</div>
+                <div>
+                    <h2>Organizaciones</h2>
+                    <p>Estado del acceso inicial de cada empresa.</p>
+                </div>
+            </div>
+            <div class="admin-organization-columns" aria-hidden="true">
+                <span>EMPRESA</span>
+                <span>PRIMER OWNER</span>
+                <span>ESTADO DE ACCESO</span>
+                <span></span>
+            </div>
+            <div id="organizationList" class="admin-organization-list" aria-live="polite"></div>
+        </section>
+    </main>
+
+    <footer class="admin-footer">PRÆTOR TECHNOLOGIES <span>·</span> FLEETOPS PLATFORM</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/fleetops-admin.js"></script>
+</body>
+</html>

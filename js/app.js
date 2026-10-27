@@ -41,6 +41,20 @@ function setStatus(button,status){
     document.getElementById("estado").value =
         status;
 
+    const incidentCategoryField =
+        document.getElementById("incidentCategoryField");
+    const incidentCategory =
+        document.getElementById("incidentCategory");
+    const isIncident =
+        status === "Incidente";
+
+    incidentCategoryField.hidden = !isIncident;
+    incidentCategory.required = isIncident;
+
+    if (!isIncident) {
+        incidentCategory.value = "";
+    }
+
 }
 
 
@@ -131,14 +145,6 @@ else{
         "GPS NO SOPORTADO";
 
 }
-
-
-// =====================================================
-// TIMESTAMP
-// =====================================================
-
-document.getElementById("hora").value =
-    new Date().toISOString();
 
 
 // =====================================================
@@ -1020,9 +1026,8 @@ fleetForm.addEventListener(
                     .value;
 
 
-            const timestamp =
-                fleetForm.elements["hora"]
-                    .value;
+            const incidentCategory =
+                fleetForm.elements["incident_category"]?.value || null;
 
 
 
@@ -1047,6 +1052,13 @@ fleetForm.addEventListener(
 
                 return;
 
+            }
+
+            if(estado === "Incidente" && !incidentCategory){
+                alert("Selecciona la causa del incidente.");
+                submitButton.disabled = false;
+                submitButton.innerText = "ENVIAR ACTUALIZACIÓN";
+                return;
             }
 
 
@@ -1152,7 +1164,7 @@ fleetForm.addEventListener(
                         estado,
 
                     timestamp:
-                        timestamp,
+                        new Date().toISOString(),
 
                     trip_id:
                         tripContext?.id ||
@@ -1202,6 +1214,11 @@ fleetForm.addEventListener(
                 estado:
                     estado,
 
+                incident_category:
+                    estado === "Incidente"
+                        ? incidentCategory
+                        : null,
+
                 latitud:
                     latitud
                     ? Number(latitud)
@@ -1224,9 +1241,6 @@ fleetForm.addEventListener(
                 observacion:
                     observacion ||
                     null,
-
-                timestamp:
-                    timestamp,
 
                 viaje_id:
                     viajeId

@@ -420,6 +420,29 @@ margin-bottom:12px;
 
 }
 
+.customer-error{
+min-height:20px;
+color:var(--red);
+font-size:12px;
+line-height:1.5;
+}
+
+.customer-operations-list{
+display:grid;
+grid-template-columns:minmax(0,1fr);
+gap:12px;
+}
+
+.customer-trip-timeline .back-link{
+color:var(--steel);
+font:10px "JetBrains Mono",monospace;
+text-decoration:none;
+}
+
+.customer-trip-timeline .back-link:hover{
+color:var(--white);
+}
+
 
 .section-title{
 
@@ -767,6 +790,23 @@ border-left:4px solid var(--red);
 box-shadow:
 0 0 0 1px rgba(193,59,59,.15);
 
+}
+
+.report-age-alert {
+    margin: 0 0 14px;
+    padding: 9px 11px;
+    color: var(--red);
+    background: rgba(193, 59, 59, 0.1);
+    border: 1px solid rgba(193, 59, 59, 0.55);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+}
+
+.report-age-duration {
+    font-weight: 700;
+    white-space: nowrap;
 }
 
 
@@ -1135,6 +1175,14 @@ padding:5px 7px;
 white-space:nowrap;
 
 }
+
+.driver-state.green{color:var(--green);border-color:var(--green)}
+.driver-state.yellow{color:var(--yellow);border-color:var(--yellow)}
+.driver-state.purple{color:var(--purple);border-color:var(--purple)}
+.driver-state.orange{color:var(--orange);border-color:var(--orange)}
+.driver-state.blue{color:var(--blue);border-color:var(--blue)}
+.driver-state.gray{color:var(--gray);border-color:var(--gray)}
+.driver-state.red{color:var(--red);border-color:var(--red)}
 
 .driver-data{
 
@@ -1852,6 +1900,13 @@ font-size:24px;
 
 }
 
+.timeline-actor {
+    margin-top: 5px;
+    color: var(--steel);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 8px;
+}
+
 
 /* =====================================================
    EVENTO FINALIZADO
@@ -1988,6 +2043,24 @@ font-size:24px;
 
 .trip-timeline::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.30);
+}
+
+.customer-trip-timeline {
+    margin-top: 14px;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+}
+
+.customer-trip-timeline summary {
+    color: var(--steel);
+    cursor: pointer;
+    font: 10px "JetBrains Mono", monospace;
+}
+
+.customer-trip-timeline-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 10px;
 }
 
 .trip-timeline {

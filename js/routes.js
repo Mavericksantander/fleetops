@@ -15,6 +15,17 @@ async function requireOperator(){
     }
     activeOrganizationId=context.activeOrganization.id;
     activeOrganization=context.activeOrganization;
+    const {data:membership,error}=await supabaseClient
+        .from("organization_members")
+        .select("role")
+        .eq("organization_id",activeOrganizationId)
+        .eq("user_id",context.session.user.id)
+        .maybeSingle();
+    if(error) throw error;
+    if(membership?.role==="customer"){
+        window.location.replace("customer-dashboard.html");
+        return false;
+    }
     return true;
 }
 

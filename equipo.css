@@ -1,6 +1,9 @@
 .back-link{color:var(--steel);font:10px "JetBrains Mono",monospace;text-decoration:none}
 .back-link:hover{color:var(--white)}
 .team-heading{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:35px 0 20px}
+.team-members-section{margin-top:42px;padding-top:24px;border-top:1px solid var(--border)}
+.team-members-section .team-heading{margin-top:0}
+.team-actions,.customer-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .team-copy{margin:8px 0 0;color:var(--steel);font-size:12px}
 .primary-action{padding:12px 16px;background:var(--green);border:1px solid var(--green);color:var(--white);font:700 11px Inter,Arial,sans-serif;cursor:pointer}
 .primary-action:hover{background:#327448}
@@ -10,7 +13,31 @@
 .team-row{display:grid;grid-template-columns:1.6fr 1fr .8fr .8fr;align-items:center;gap:15px;padding:16px;background:var(--panel);border:1px solid var(--border)}
 .team-name{font-weight:600}.team-email,.team-meta{display:block;margin-top:4px;color:var(--steel);font-size:11px}
 .team-role,.team-status{font:10px "JetBrains Mono",monospace;text-transform:uppercase}
-.team-status.active{color:var(--green)}.team-status.pending{color:var(--yellow)}.team-status.expired{color:var(--red)}
+.team-status.active{color:var(--green)}.team-status.pending{color:var(--yellow)}.team-status.expired{color:var(--red)}.team-status.inactive{color:var(--steel)}
+.customer-access-panel{margin:24px 0;padding:20px;background:var(--panel);border:1px solid var(--border)}
+.customer-access-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;align-items:end;gap:10px;margin-top:18px}
+.customer-access-form label,.team-form label{display:block;margin-bottom:6px;color:var(--steel);font:10px "JetBrains Mono",monospace}
+.customer-access-form select,.team-form input{width:100%;margin-top:0;padding:11px;background:var(--panel2);border:1px solid var(--border);color:var(--white);font:13px Inter,Arial,sans-serif}
+.team-field,.customer-access-field{min-width:0}
+.customer-access-form select{margin-top:0}
+.customer-access-form .primary-action{min-height:40px}
+.customer-card{padding:18px;background:var(--panel);border:1px solid var(--border)}
+.customer-card-header,.customer-card-meta,.customer-actions,.customer-access-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.customer-card-meta{justify-content:flex-start;flex-wrap:wrap;margin-top:14px;color:var(--steel);font-size:11px}
+.customer-access-list{display:grid;gap:6px;margin-top:14px}
+.customer-access-row{padding:9px 10px;background:var(--panel2);color:var(--steel);font-size:11px}
+.customer-invites{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.customer-invite-status{padding:5px 7px;border:1px solid var(--border);background:var(--panel2);color:var(--steel);font:9px "JetBrains Mono",monospace;overflow-wrap:anywhere}
+.customer-invite-status.pending{border-color:#c9a22755;background:#c9a22712;color:var(--yellow)}
+.customer-invite-status.accepted{border-color:#3e8f5c66;background:#3e8f5c17;color:#75c18e}
+.customer-invite-status.expired{border-color:#c13b3b55;background:#c13b3b12;color:#e17a7a}
+.customer-actions{justify-content:flex-start;margin-top:12px}
+.text-action{padding:6px 0;background:none;border:0;color:var(--green);font:600 10px "JetBrains Mono",monospace;cursor:pointer}
+.text-action:hover{color:var(--white)}
+.team-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px;margin-bottom:18px}
+.team-form[hidden]{display:none}
+.team-form .primary-action{grid-column:1/-1;justify-self:start}
+.team-dialog label,.team-dialog form>input,.team-dialog form>select{display:block;margin-bottom:10px}
 .team-empty{padding:35px 20px;color:var(--steel);background:var(--panel);border:1px solid var(--border);font-size:12px}
 .team-modal{position:fixed;inset:0;display:grid;place-items:center;padding:20px;background:#0009;z-index:10}
 .team-modal[hidden]{display:none}
@@ -20,3 +47,4 @@
 .team-dialog input,.team-dialog select{width:100%;padding:12px;background:var(--panel2);border:1px solid var(--border);color:var(--white);font:14px Inter,Arial,sans-serif}
 .team-dialog select{appearance:auto}.invite-result{margin-top:18px}.invite-url-row{display:flex;gap:8px}.invite-url-row input{min-width:0}.invite-url-row button{padding:0 12px;background:var(--white);border:0;color:var(--bg);font:700 10px Inter,Arial,sans-serif;white-space:nowrap;cursor:pointer}
 @media (max-width:700px){.team-heading{align-items:flex-start;flex-direction:column}.team-row{grid-template-columns:1fr 1fr}.team-row .team-email{grid-column:1/-1}.invite-url-row{flex-direction:column}.invite-url-row button{padding:12px}}
+@media (max-width:760px){.customer-access-form{grid-template-columns:1fr}.customer-access-form .primary-action{justify-self:start}.team-form{grid-template-columns:1fr}.team-form .primary-action{grid-column:auto}.customer-card-header{align-items:flex-start}}

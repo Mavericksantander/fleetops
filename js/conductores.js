@@ -128,6 +128,10 @@ async function initializeOperatorSession() {
     if (error) {
         throw error;
     }
+    if (membership?.role === "customer") {
+        window.location.replace("customer-dashboard.html");
+        return false;
+    }
     canManageDrivers = ["owner", "admin"].includes(membership?.role);
 
     return true;
@@ -792,11 +796,21 @@ async function createDriverInvite() {
     const dialog = document.createElement("div");
     dialog.className = "assignment-modal";
     dialog.innerHTML = `
-        <div class="assignment-dialog" role="dialog" aria-modal="true">
-            <div class="section-title">INVITACIÓN GENERADA</div>
-            <input type="text" readonly value="${escapeHTML(link)}">
-            <button type="button" class="assignment-submit" data-copy-invite> COPIAR ENLACE </button>
-            <button type="button" class="assignment-close" data-close-invite>CERRAR</button>
+        <div class="assignment-dialog driver-invite-dialog" role="dialog" aria-modal="true" aria-labelledby="driverInviteTitle" aria-describedby="driverInviteDescription">
+            <div class="driver-invite-header">
+                <div class="driver-invite-heading">
+                    <span class="driver-invite-icon" aria-hidden="true">✓</span>
+                    <div>
+                        <div class="driver-invite-eyebrow">ACCESO DE CONDUCTOR</div>
+                        <div class="section-title" id="driverInviteTitle">INVITACIÓN GENERADA</div>
+                    </div>
+                </div>
+                <button type="button" class="assignment-close" data-close-invite aria-label="Cerrar">×</button>
+            </div>
+            <p class="driver-invite-description" id="driverInviteDescription">Comparte este enlace con el conductor para completar su registro y unirse a la organización.</p>
+            <label class="driver-invite-label" for="driverInviteUrl">ENLACE DE INVITACIÓN</label>
+            <input class="driver-invite-url" id="driverInviteUrl" type="text" readonly value="${escapeHTML(link)}">
+            <button type="button" class="assignment-submit driver-invite-copy" data-copy-invite>COPIAR ENLACE</button>
         </div>
     `;
     document.body.appendChild(dialog);

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PRÆTOR FleetOps | Cliente</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+<div class="app">
+    <header class="header">
+        <div>
+            <div class="title">PRÆTOR FleetOps</div>
+            <div class="subtitle">CLIENTE · VISIBILIDAD OPERACIONAL</div>
+        </div>
+        <div class="connection">
+            <span id="connectionIndicator"></span>
+            <div><span id="connectionText">CONNECTING</span></div>
+        </div>
+    </header>
+
+    <nav class="dashboard-nav" aria-label="Navegación cliente">
+        <button class="nav-button active" type="button" data-view="operationsView">OPERACIONES</button>
+        <button class="nav-button" id="logoutButton" type="button">CERRAR SESIÓN</button>
+    </nav>
+
+    <main>
+        <section id="operationsView" class="view-panel active">
+            <section class="summary">
+                <div class="summary-card">
+                    <div class="summary-label">OPERACIONES</div>
+                    <div class="summary-value" id="summaryActive">0</div>
+                </div>
+                <div class="summary-card green">
+                    <div class="summary-label">EN RUTA</div>
+                    <div class="summary-value" id="summaryEnRuta">0</div>
+                </div>
+                <div class="summary-card yellow">
+                    <div class="summary-label">ESPERANDO CARGA</div>
+                    <div class="summary-value" id="summaryEsperandoCarga">0</div>
+                </div>
+                <div class="summary-card purple">
+                    <div class="summary-label">CARGANDO</div>
+                    <div class="summary-value" id="summaryCargando">0</div>
+                </div>
+                <div class="summary-card orange">
+                    <div class="summary-label">DESCARGANDO</div>
+                    <div class="summary-value" id="summaryDescargando">0</div>
+                </div>
+                <div class="summary-card red">
+                    <div class="summary-label">INCIDENTES</div>
+                    <div class="summary-value" id="summaryIncidentes">0</div>
+                </div>
+            </section>
+
+            <section class="toolbar">
+                <div class="section-title" id="customerName">CLIENTE</div>
+                <div class="last-update">ÚLTIMA ACTUALIZACIÓN <span id="customerLastUpdate">--</span></div>
+            </section>
+
+            <div id="customerError" class="customer-error" role="alert"></div>
+            <div id="customerEmptyState" class="empty-state" hidden>
+                <div class="empty-code">SIN VIAJES</div>
+                <div class="empty-title">NO HAY OPERACIONES EN CURSO</div>
+                <div class="empty-text">Aún no tiene viajes autorizados para consultar. Cuando su operador asigne una operación, aparecerá aquí con su estado y última actualización. Si esperaba ver un viaje, contacte a su operador de flota.</div>
+            </div>
+            <section id="customerOperationsList" class="customer-operations-list" aria-live="polite"></section>
+        </section>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/organization-context.js"></script>
+<script src="js/customer-dashboard.js"></script>
+</body>
+</html>

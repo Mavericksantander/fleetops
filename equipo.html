@@ -16,12 +16,68 @@
 </header>
 
 <main>
-    <section class="team-heading">
-        <div><div class="section-title">MIEMBROS</div><p class="team-copy">Administra los colaboradores de tu organización.</p></div>
-        <button class="primary-action" id="inviteButton" type="button" hidden>INVITAR COLABORADOR</button>
+    <section class="team-members-section">
+        <div class="team-heading">
+            <div>
+                <div class="section-title">COLABORADORES DE LA ORGANIZACIÓN</div>
+                <p class="team-copy">Gestiona los accesos internos. Los usuarios invitados como clientes aparecen en Gestión de clientes, no en este equipo.</p>
+            </div>
+            <button class="primary-action" id="inviteButton" type="button" hidden>INVITAR COLABORADOR</button>
+        </div>
+        <section id="teamList" class="team-list" aria-live="polite"></section>
     </section>
-    <div id="teamError" class="team-error" role="alert"></div>
-    <section id="teamList" class="team-list" aria-live="polite"></section>
+
+    <section class="customer-management-section">
+        <section class="team-heading">
+            <div><div class="section-title">GESTIÓN DE CLIENTES</div><p class="team-copy">Administra clientes y las operaciones que pueden visualizar.</p></div>
+        </section>
+        <form id="customerForm" class="team-form">
+            <div class="team-field">
+                <label for="customerName">NOMBRE DEL CLIENTE</label>
+                <input id="customerName" type="text" maxlength="150" required>
+            </div>
+            <div class="team-field">
+                <label for="customerContact">CONTACTO</label>
+                <input id="customerContact" type="text" maxlength="120">
+            </div>
+            <div class="team-field">
+                <label for="customerEmail">EMAIL DE CONTACTO</label>
+                <input id="customerEmail" type="email" maxlength="160">
+            </div>
+            <div class="team-field">
+                <label for="customerPhone">TELÉFONO</label>
+                <input id="customerPhone" type="tel" maxlength="30">
+            </div>
+            <button class="primary-action" id="createCustomerSubmit" type="submit">CREAR CLIENTE</button>
+        </form>
+        <div id="customerMessage" class="team-error" role="status"></div>
+        <section id="customerAccessPanel" class="customer-access-panel">
+            <div class="section-title">AUTORIZAR OPERACIONES</div>
+            <p class="team-copy">Autoriza rutas recurrentes o un viaje específico. Un viaje excluido prevalece sobre una autorización de ruta.</p>
+            <form id="customerAccessForm" class="customer-access-form">
+                <div class="customer-access-field">
+                    <label for="accessCustomer">CLIENTE</label>
+                    <select id="accessCustomer" required></select>
+                </div>
+                <div class="customer-access-field">
+                    <label for="accessScope">TIPO DE ACCESO</label>
+                    <select id="accessScope" required>
+                        <option value="route">Ruta recurrente</option>
+                        <option value="trip">Viaje específico</option>
+                        <option value="exclude">Excluir viaje de una ruta</option>
+                    </select>
+                </div>
+                <div class="customer-access-field">
+                    <label for="accessOperation">OPERACIÓN</label>
+                    <select id="accessOperation" required></select>
+                </div>
+                <button class="primary-action" id="grantAccessButton" type="submit">GUARDAR ACCESO</button>
+            </form>
+            <div id="customerAccessError" class="team-error" role="alert"></div>
+        </section>
+        <div id="teamError" class="team-error" role="alert"></div>
+        <section id="customerList" class="team-list" aria-live="polite"></section>
+    </section>
 </main>
 
 <div id="inviteModal" class="team-modal" hidden>
@@ -30,8 +86,16 @@
         <form id="inviteForm">
             <label for="inviteEmail">EMAIL</label>
             <input id="inviteEmail" type="email" required autocomplete="email">
+            <div id="inviteCustomerField" hidden>
+                <label for="inviteCustomer">CLIENTE</label>
+                <select id="inviteCustomer" required></select>
+            </div>
             <label for="inviteRole">ROL</label>
-            <select id="inviteRole" required><option value="admin">Admin</option><option value="operator">Operator</option><option value="viewer">Viewer</option></select>
+            <select id="inviteRole" required>
+                <option value="admin">Admin</option>
+                <option value="operator">Operator</option>
+                <option value="viewer">Viewer</option>
+            </select>
             <button class="primary-action" id="generateInviteButton" type="submit">GENERAR INVITACIÓN</button>
         </form>
         <div id="inviteResult" class="invite-result" hidden>

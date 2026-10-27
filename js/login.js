@@ -84,7 +84,56 @@ function getNextPath() {
     return "dashboard.html";
 }
 
-function redirectAfterLogin() {
+async function redirectAfterLogin() {
+    const {
+        data: sessionData,
+        error: sessionError
+    } = await supabaseClient.auth.getSession();
+
+    if (sessionError) {
+        throw sessionError;
+    }
+
+    if (!sessionData.session) {
+        window.location.replace(getNextPath());
+        return;
+    }
+
+    const { data: isPlatformOwner, error: platformOwnerError } = await supabaseClient.rpc(
+        "is_fleetops_platform_owner"
+    );
+    if (platformOwnerError) {
+        throw platformOwnerError;
+    }
+    if (isPlatformOwner) {
+        window.location.replace("fleetops-admin.html");
+        return;
+    }
+
+    if (!getActiveOrganizationId()) {
+        window.location.replace(getNextPath());
+        return;
+    }
+
+    const {
+        data: memberships,
+        error: membershipsError
+    } = await supabaseClient
+        .from("organization_members")
+        .select("role")
+        .eq("organization_id", getActiveOrganizationId())
+        .eq("user_id", sessionData.session.user.id)
+        .limit(1);
+
+    if (membershipsError) {
+        throw membershipsError;
+    }
+
+    if (memberships && memberships[0] && memberships[0].role === "customer") {
+        window.location.replace("customer-dashboard.html");
+        return;
+    }
+
     window.location.replace(getNextPath());
 }
 
@@ -130,9 +179,9 @@ function renderOrganizations(organizations) {
         button.type = "button";
         button.className = "organization-button";
         button.innerText = organization.name || "Organización sin nombre";
-        button.addEventListener("click", function () {
+        button.addEventListener("click", async function () {
             setActiveOrganizationId(organization.id);
-            redirectAfterLogin();
+            await redirectAfterLogin();
         });
         organizationList.appendChild(button);
     });
@@ -157,7 +206,22 @@ async function continueAfterAuthentication() {
             }
 
             setActiveOrganizationId(acceptedInvite.organization_id);
-            redirectAfterLogin();
+            if (acceptedInvite.role === "customer") {
+                window.location.replace("customer-dashboard.html");
+                return;
+            }
+            await redirectAfterLogin();
+            return;
+        }
+
+        const { data: isPlatformOwner, error: platformOwnerError } = await supabaseClient.rpc(
+            "is_fleetops_platform_owner"
+        );
+        if (platformOwnerError) {
+            throw platformOwnerError;
+        }
+        if (isPlatformOwner) {
+            window.location.replace("fleetops-admin.html");
             return;
         }
 
@@ -175,7 +239,7 @@ async function continueAfterAuthentication() {
 
         if (context.organizations.length === 1) {
             setActiveOrganizationId(context.organizations[0].id);
-            redirectAfterLogin();
+            await redirectAfterLogin();
             return;
         }
 
@@ -236,7 +300,7 @@ organizationCreateForm.addEventListener("submit", async function (event) {
     }
 
     setActiveOrganizationId(createdOrganization.organization_id);
-    redirectAfterLogin();
+    await redirectAfterLogin();
 });
 
 async function redirectIfAuthenticated() {
@@ -394,6 +458,27 @@ async function loadInviteContext() {
         loginError.innerText = "Esta invitación expiró.";
     } else if (context.invite_status === "used") {
         loginError.innerText = "Esta invitación ya fue utilizada.";
+    } else if (context.role === "customer") {
+        const { data: customerData, error: customerError } = await supabaseClient.rpc(
+            "get_customer_member_invite_context",
+            { p_token: inviteToken }
+        );
+        if (customerError) {
+            console.error("PRÆTOR FleetOps: no fue posible cargar el contexto de invitación del cliente", customerError);
+            loginError.innerText = "No fue posible verificar la invitación del cliente.";
+            return;
+        }
+
+        const customerContext = Array.isArray(customerData) ? customerData[0] : customerData;
+        if (!customerContext || customerContext.invite_status !== "pending") {
+            loginError.innerText = customerContext?.invite_status === "expired"
+                ? "Esta invitación expiró."
+                : "La invitación del cliente no está disponible.";
+            return;
+        }
+        loginCopy.innerText = `Has sido invitado como usuario de cliente ${customerContext.customer_name} por ${customerContext.organization_name}. Inicia sesión con el email invitado.`;
+    } else if (context.role === "owner") {
+        loginCopy.innerText = `Has sido invitado como primer owner de ${context.organization_name}. Crea tu cuenta o inicia sesión con el email invitado para activar la empresa.`;
     } else {
         loginCopy.innerText = `Has sido invitado a trabajar en ${context.organization_name}. Inicia sesión con el email invitado.`;
     }

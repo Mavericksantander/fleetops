@@ -33,6 +33,7 @@ const profileDriverId =
 let activeOrganizationId = null;
 let dashboardAccessValid = false;
 let dashboardPollingId = null;
+const STALE_REPORT_THRESHOLD_MS = 6 * 60 * 60 * 1000;
 
 // =====================================================
 // VALIDACIÓN
@@ -75,6 +76,25 @@ async function initializeOperatorSession() {
         window.location.replace(
             `login.html?next=${encodeURIComponent(window.location.pathname)}`
         );
+        return false;
+    }
+
+    const {
+        data: memberships,
+        error: membershipError
+    } = await supabaseClient
+        .from("organization_members")
+        .select("role")
+        .eq("organization_id", context.activeOrganization.id)
+        .eq("user_id", context.session.user.id)
+        .limit(1);
+
+    if (membershipError) {
+        throw membershipError;
+    }
+
+    if (memberships && memberships[0] && memberships[0].role === "customer") {
+        window.location.replace("customer-dashboard.html");
         return false;
     }
 
@@ -262,6 +282,7 @@ function renderConductors(conductors) {
                         <span class="data-label">RUT</span>
                         <span class="data-value">${escapeHTML(conductor.rut || "--")}</span>
                     </div>
+
                     <div class="data-row">
                         <span class="data-label">LICENCIA</span>
                         <span class="data-value">${escapeHTML(conductor.licencia || "--")}</span>
@@ -653,7 +674,8 @@ function formatLiveDuration(start) {
 
 function buildEventTimeline(
     reports,
-    trip
+    trip,
+    conductorsById
 ) {
 
     if (!trip) {
@@ -712,6 +734,16 @@ function buildEventTimeline(
             return {
 
                 ...report,
+
+                actor_label:
+                    report.actor_type === "operator"
+                        ? `OPERADOR · ${report.actor_user_id || "ID NO DISPONIBLE"}`
+                        : report.actor_conductor_id &&
+                            conductorsById[report.actor_conductor_id]
+                            ? `CONDUCTOR · ${conductorsById[report.actor_conductor_id].driver_id || "ID NO DISPONIBLE"}`
+                            : report.actor_type === "legacy"
+                                ? "REGISTRO ANTIGUO · ACTOR NO REGISTRADO"
+                                : "CONDUCTOR · IDENTIDAD NO VERIFICADA",
 
                 start,
 
@@ -1010,6 +1042,18 @@ function createUnitCard(unit) {
                 unit.fecha_inicio
             );
 
+    const lastActivity =
+        unit.timestamp ||
+        unit.fecha_inicio;
+    const isStale =
+        unit.estado !== "Finalizado" &&
+        lastActivity &&
+        Date.now() - new Date(lastActivity).getTime() >= STALE_REPORT_THRESHOLD_MS;
+    const staleDuration =
+        isStale
+            ? formatLiveDuration(lastActivity)
+            : "";
+
 
     let mapsButton = "";
 
@@ -1107,7 +1151,11 @@ function createUnitCard(unit) {
                                                 ${escapeHTML(
                                                     event.estado
                                                 )}
-
+                                                ${
+                                                    event.incident_category
+                                                        ? ` · ${escapeHTML(event.incident_category)}`
+                                                        : ""
+                                                }
                                             </span>
 
 
@@ -1143,6 +1191,10 @@ function createUnitCard(unit) {
                                                     : ""
                                             }
 
+                                        </div>
+
+                                        <div class="timeline-actor">
+                                            ${escapeHTML(event.actor_label)}
                                         </div>
 
 
@@ -1224,6 +1276,21 @@ function createUnitCard(unit) {
             </div>
 
         </div>
+
+
+        ${
+            isStale
+                ? `
+                    <div class="report-age-alert" role="status">
+                        ${
+                            unit.has_report
+                                ? `SIN ACTUALIZACIÓN · <span class="report-age-duration" data-start="${escapeHTML(lastActivity)}">${escapeHTML(staleDuration)}</span>`
+                                : `SIN REPORTE OPERACIONAL · <span class="report-age-duration" data-start="${escapeHTML(lastActivity)}">${escapeHTML(staleDuration)}</span>`
+                        }
+                    </div>
+                `
+                : ""
+        }
 
 
         <div class="unit-data">
@@ -1314,6 +1381,17 @@ function createUnitCard(unit) {
                 </span>
 
             </div>
+
+            ${
+                unit.incident_category
+                    ? `
+                        <div class="data-row">
+                            <span class="data-label">CAUSA DEL INCIDENTE</span>
+                            <span class="data-value">${escapeHTML(unit.incident_category)}</span>
+                        </div>
+                    `
+                    : ""
+            }
 
         </div>
 
@@ -1456,7 +1534,8 @@ function buildUnits(
             const timeline =
                 buildEventTimeline(
                     reports,
-                    trip
+                    trip,
+                    conductorsById
                 );
 
 
@@ -1545,6 +1624,13 @@ function buildUnits(
                 observacion:
                     latestReport?.observacion ??
                     null,
+
+                incident_category:
+                    latestReport?.incident_category ??
+                    null,
+
+                has_report:
+                    Boolean(latestReport),
 
                 timeline:
                     timeline
@@ -1667,6 +1753,13 @@ function buildLegacyUnits(
                     observacion:
                         report.observacion ||
                         null,
+
+                    incident_category:
+                        report.incident_category ||
+                        null,
+
+                    has_report:
+                        true,
 
                     timeline: []
 
@@ -1815,10 +1908,14 @@ async function loadReports() {
                 viaje_id,
                 conductor,
                 conductor_id,
+                actor_type,
+                actor_conductor_id,
+                actor_user_id,
                 patente,
                 empresa,
                 ruta,
                 estado,
+                incident_category,
                 latitud,
                 longitud,
                 precision_gps,
@@ -2177,7 +2274,7 @@ function updateLiveDurations() {
 
     document
         .querySelectorAll(
-            ".state-duration"
+            ".state-duration, .report-age-duration"
         )
         .forEach(
             element => {
@@ -2277,6 +2374,17 @@ function downloadTripReport(tripId) {
     const timeline =
         unit.timeline || [];
 
+    function formatTimestampForExport(timestamp) {
+        if (!timestamp) {
+            return "";
+        }
+
+        const date = new Date(timestamp);
+        return Number.isNaN(date.getTime())
+            ? ""
+            : date.toISOString();
+    }
+
 
     const rows = [];
 
@@ -2322,14 +2430,14 @@ function downloadTripReport(tripId) {
     rows.push([
         "INICIO VIAJE",
         unit.fecha_inicio
-            ? formatTimestamp(unit.fecha_inicio)
+            ? formatTimestampForExport(unit.fecha_inicio)
             : ""
     ]);
 
     rows.push([
         "FINALIZACIÓN VIAJE",
         unit.fecha_finalizacion
-            ? formatTimestamp(unit.fecha_finalizacion)
+            ? formatTimestampForExport(unit.fecha_finalizacion)
             : ""
     ]);
 
@@ -2348,6 +2456,8 @@ function downloadTripReport(tripId) {
 
     rows.push([
         "ESTADO",
+        "ACTOR",
+        "CAUSA DEL INCIDENTE",
         "INICIO",
         "FIN",
         "DURACIÓN",
@@ -2362,15 +2472,17 @@ function downloadTripReport(tripId) {
 
             rows.push([
                 event.estado || "",
+                event.actor_label || "IDENTIDAD NO VERIFICADA",
+                event.incident_category || "",
 
                 event.start
-                    ? formatTimestamp(
+                    ? formatTimestampForExport(
                         event.start
                     )
                     : "",
 
                 event.end
-                    ? formatTimestamp(
+                    ? formatTimestampForExport(
                         event.end
                     )
                     : "",
