@@ -3,7 +3,7 @@
 -- Fuente: snapshot de catálogos de prod (2026-10-27 ~13:40 hora Chile, UTC-3).
 -- Objetivo: cerrar el drift repo <-> prod. Esta migración DESCRIBE lo que ya
 -- existe en prod: en prod NO debe ejecutarse, sino marcarse como aplicada
---   supabase migration repair --status applied 20261027000000
+--   supabase migration repair --linked --project-ref sqvmyigzayuqahzmkujn --status applied 20261027000000
 -- Ajustes mecánicos respecto del snapshot (para que sea ejecutable desde cero):
 --   * constraints reordenados (FK al final), índices con IF NOT EXISTS
 --     (los PK/UNIQUE ya crean su índice);
