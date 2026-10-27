@@ -12,6 +12,8 @@ drop function if exists private.can_read_invite_document(text);
 
 revoke execute on all functions in schema private from public, anon;
 
+-- El EXECUTE a PUBLIC es un default global. Un REVOKE IN SCHEMA no lo pisa.
+alter default privileges revoke execute on functions from public, anon;
 alter default privileges in schema private
     revoke execute on functions from public, anon;
 

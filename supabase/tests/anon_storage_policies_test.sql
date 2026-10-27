@@ -38,6 +38,7 @@ insert into storage.objects(bucket_id, name) values
  ('fleetops-documents','legacy/no-invite.jpg');
 
 create or replace function private.probe_default_execute() returns int language sql as $$ select 1 $$;
+create or replace function public.probe_public_default_execute() returns int language sql as $$ select 1 $$;
 
 create or replace function pg_temp.anon_denied(p_sql text) returns boolean language plpgsql as $$
 begin
@@ -83,6 +84,8 @@ begin
          'anon ejecuta una función nueva de private';
   assert not has_function_privilege('public', 'private.probe_default_execute()', 'execute'),
          'public ejecuta una función nueva de private';
+  assert has_function_privilege('anon', 'public.probe_public_default_execute()', 'execute'),
+         'anon perdió el default de las funciones nuevas de public';
   assert has_function_privilege('anon', 'public.resolve_viaje_public(uuid)', 'execute'),
          'anon perdió resolve_viaje_public';
   assert has_function_privilege('anon', 'public.submit_driver_report(uuid,text,text,text,text,text,text,text,double precision,double precision,double precision,text,text)', 'execute'),
@@ -101,6 +104,7 @@ begin
 end $$;
 
 drop function private.probe_default_execute();
+drop function public.probe_public_default_execute();
 
 -- El miembro lee el path registrado y no el objeto suelto del prefijo.
 set role authenticated;
