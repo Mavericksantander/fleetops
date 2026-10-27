@@ -17,6 +17,8 @@ create or replace function auth.uid() returns uuid language sql stable as
 $$ select nullif(nullif(current_setting('request.jwt.claims', true),'')::json->>'sub','')::uuid $$;
 create or replace function auth.email() returns text language sql stable as
 $$ select nullif(current_setting('request.jwt.claims', true),'')::json->>'email' $$;
+create or replace function auth.role() returns text language sql stable as
+$$ select nullif(current_setting('request.jwt.claims', true),'')::json->>'role' $$;
 grant usage on schema auth, extensions, public to anon, authenticated, service_role;
 grant execute on all functions in schema auth to anon, authenticated, service_role;
 alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
@@ -53,3 +55,17 @@ grant select, insert, update, delete on storage.objects to anon, authenticated, 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('fleetops-documents', 'fleetops-documents', false, null, null)
 on conflict (id) do nothing;
+
+-- Mismo contrato que el helper de Supabase: 'object.delete_many' y
+-- 'storage.object.delete_many' coinciden; sin GUC o con texto vacío, false.
+create or replace function storage.allow_only_operation(op text)
+returns boolean
+language sql
+stable
+as $$
+  select coalesce(btrim(op), '') <> ''
+     and coalesce(btrim(current_setting('storage.operation', true)), '') <> ''
+     and regexp_replace(btrim(op), '^storage\.', '')
+         = regexp_replace(btrim(current_setting('storage.operation', true)), '^storage\.', '')
+$$;
+grant execute on function storage.allow_only_operation(text) to anon, authenticated, service_role;
