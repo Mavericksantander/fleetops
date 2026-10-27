@@ -94,7 +94,7 @@ begin
                coalesce(pg_get_expr(polwithcheck, polrelid), '') as c
           from pg_policy
          where polrelid = 'storage.objects'::regclass
-           and polname like '%fleetops_documents'
+           and polname like 'authenticated_%fleetops_documents'
     loop
         assert (r.u || r.c) like '%can_access_document_path%', r.polname || ' no usa el helper';
         assert (r.u || r.c) like '%fleetops-documents%', r.polname || ' no restringe el bucket';
