@@ -12,10 +12,9 @@ drop function if exists private.can_read_invite_document(text);
 
 revoke execute on all functions in schema private from public, anon;
 
--- El EXECUTE a PUBLIC es un default global. Un REVOKE IN SCHEMA no lo pisa.
-alter default privileges revoke execute on functions from public, anon;
-alter default privileges in schema private
-    revoke execute on functions from public, anon;
+-- Toda función nueva que cree postgres, en cualquier schema y para todos
+-- los roles. Fuera de public hace falta GRANT EXECUTE explícito.
+alter default privileges for role postgres revoke execute on functions from public;
 
 grant execute on function private.driver_invite_may_upload(text) to anon;
 
