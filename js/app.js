@@ -899,6 +899,67 @@ async function finalizeTrip(
 
 
 // =====================================================
+// T-012: REPORTE DEL CONDUCTOR VÍA RPC (SIN SESIÓN)
+// =====================================================
+
+async function submitDriverReport({
+    viajeId,
+    estado,
+    patente,
+    driverId,
+    rut,
+    telefono,
+    conductor,
+    incidentCategory,
+    latitud,
+    longitud,
+    precision,
+    googleMaps,
+    observacion
+}){
+
+    const toNumber = value =>
+        value === "" || value === null || value === undefined
+            ? null
+            : Number(value);
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient.rpc(
+            "submit_driver_report",
+            {
+                p_viaje_id: viajeId,
+                p_estado: estado,
+                p_patente: patente || null,
+                p_driver_id: driverId || null,
+                p_rut: rut || null,
+                p_telefono: telefono || null,
+                p_conductor: conductor || null,
+                p_incident_category: incidentCategory || null,
+                p_latitud: toNumber(latitud),
+                p_longitud: toNumber(longitud),
+                p_precision_gps: toNumber(precision),
+                p_google_maps: googleMaps || null,
+                p_observacion: observacion || null
+            }
+        );
+
+    if(error){
+        throw new Error(
+            "Supabase: " +
+            error.message
+        );
+    }
+
+    return Array.isArray(data)
+        ? data[0] || null
+        : data || null;
+
+}
+
+// =====================================================
 // SUBMIT
 // =====================================================
 
@@ -1082,6 +1143,69 @@ fleetForm.addEventListener(
             }
 
 
+
+            // =========================================
+            // T-012: FLUJO QR (?viaje=UUID) VÍA RPC VALIDADA
+            // =========================================
+            // Desde T-012 el rol anónimo no puede leer
+            // conductores ni insertar en reportes. El reporte
+            // del conductor se envía a submit_driver_report,
+            // que valida viaje activo, patente y que el
+            // conductor pertenezca a la organización del viaje.
+            // =========================================
+
+            if(tripIdFromUrl){
+
+                const submitted =
+                    await submitDriverReport({
+                        viajeId: tripIdFromUrl,
+                        estado,
+                        patente,
+                        driverId,
+                        rut,
+                        telefono,
+                        conductor,
+                        incidentCategory:
+                            estado === "Incidente"
+                                ? incidentCategory
+                                : null,
+                        latitud,
+                        longitud,
+                        precision,
+                        googleMaps,
+                        observacion
+                    });
+
+                try{
+                    if(submitted?.driver_id){
+                        localStorage.setItem("fleetops.driver_id", submitted.driver_id);
+                    }
+                    if(submitted?.conductor){
+                        localStorage.setItem("fleetops.driver_name", submitted.conductor);
+                    }
+                }
+                catch(storageError){
+                    console.warn("FLEETOPS: no fue posible guardar identidad local", storageError);
+                }
+
+                window.location.replace(
+                    "success.html"
+                );
+
+                return;
+
+            }
+
+            const {
+                data: sessionData
+            } =
+                await supabaseClient.auth.getSession();
+
+            if(!sessionData?.session){
+                throw new Error(
+                    "Escanea el QR del viaje entregado por la torre de control para reportar."
+                );
+            }
 
             // =========================================
             // IDENTIFICAR CONDUCTOR
