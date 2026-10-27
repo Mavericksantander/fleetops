@@ -82,6 +82,8 @@ begin
          'authenticated no ejecuta can_access_document_path';
   assert not has_function_privilege('anon', 'private.probe_default_execute()', 'execute'),
          'anon ejecuta una función nueva de private';
+  assert not has_function_privilege('authenticated', 'private.probe_default_execute()', 'execute'),
+         'authenticated ejecuta una función nueva de private';
   assert not has_function_privilege('public', 'private.probe_default_execute()', 'execute'),
          'public ejecuta una función nueva de private';
   assert has_function_privilege('anon', 'public.probe_public_default_execute()', 'execute'),
@@ -100,6 +102,20 @@ begin
          'anon perdió get_customer_member_invite_context';
   assert not has_function_privilege('anon', 'public.create_member_invite(text,text)', 'execute'),
          'anon ejecuta create_member_invite';
+
+  select count(*) into n from pg_default_acl where defaclnamespace = 0;
+  assert n = 1, format('pg_default_acl globales = %s', n);
+  select count(*) into n
+    from pg_default_acl
+   where defaclnamespace = 0
+     and pg_get_userbyid(defaclrole) = 'postgres'
+     and defaclobjtype = 'f';
+  assert n = 1, 'la fila global de pg_default_acl no es la de funciones de postgres';
+  select count(*) into n
+    from pg_default_acl d
+    join pg_namespace nsp on nsp.oid = d.defaclnamespace
+   where nsp.nspname = 'private';
+  assert n = 0, 'quedó un default privileges en el schema private';
   raise notice 'PRIVILEGIOS: OK — anon solo ejecuta driver_invite_may_upload en private; los RPC públicos de la demo siguen';
 end $$;
 
