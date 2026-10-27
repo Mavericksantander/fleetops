@@ -1,6 +1,7 @@
 # Local Supabase configuration (never commit real credentials)
 js/supabase-config.js
 supabase-config.js
+supabase/.temp/
 .env
 .env.*
 !.env.example

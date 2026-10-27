@@ -1,0 +1,24 @@
+name: checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: node --check
+        run: |
+          set -euo pipefail
+          for f in js/*.js scripts/*.mjs; do
+            node --check "$f"
+          done

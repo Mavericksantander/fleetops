@@ -2,7 +2,7 @@
 // Build estático sin dependencias para Vercel.
 // - Copia solo los archivos públicos (raíz *.html/*.css y js/) a dist/.
 // - Genera dist/js/supabase-config.js desde SUPABASE_URL y SUPABASE_ANON_KEY.
-// supabase/, migrations/, archive/, scripts/ y README nunca llegan a dist/.
+// supabase/, migrations/, scripts/ y README nunca llegan a dist/.
 import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
