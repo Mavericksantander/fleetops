@@ -52,6 +52,10 @@ on conflict (email) do nothing;
 
 No reejecutar el INSERT histórico en prod.
 
+## Funciones nuevas
+
+`20261027210000` ejecuta `alter default privileges for role postgres revoke execute on functions from public`. Aplica a toda función nueva que cree `postgres`, en cualquier schema y para todos los roles: ya no heredan `EXECUTE` de `PUBLIC`. En `public`, el default de Supabase sigue otorgando `EXECUTE` a `anon`, `authenticated` y `service_role`. Fuera de `public` hay que poner un `GRANT EXECUTE` explícito al rol que deba llamarla.
+
 ## Checks
 
 `.github/workflows/checks.yml` corre `node --check` sobre `js/*.js` y `scripts/*.mjs`. `supabase/tests/local/run_local.py` necesita Postgres local y psycopg; no está en ese workflow.
