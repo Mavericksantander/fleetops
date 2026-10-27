@@ -73,12 +73,21 @@ function getNextPath() {
     const requestedPath =
         new URLSearchParams(window.location.search).get("next");
 
+    // "/" no basta: WHATWG trata "\" como "/" y borra tab, así que
+    // "/\evil.com" y "/\t/evil.com" se resuelven como "//evil.com".
     if (
         requestedPath &&
         requestedPath.startsWith("/") &&
         !requestedPath.startsWith("//")
     ) {
-        return requestedPath;
+        try {
+            const resolved = new URL(requestedPath, window.location.origin);
+            if (resolved.origin === window.location.origin) {
+                return requestedPath;
+            }
+        } catch {
+            return "dashboard.html";
+        }
     }
 
     return "dashboard.html";
