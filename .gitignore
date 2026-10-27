@@ -25,3 +25,7 @@ node_modules/
 *.backup
 *.bak[0-9]*
 *.before-*
+
+# Build output (Vercel)
+dist/
+.vercel/

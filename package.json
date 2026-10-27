@@ -1,0 +1,11 @@
+{
+  "name": "fleetops",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-config.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

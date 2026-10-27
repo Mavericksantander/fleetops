@@ -1215,8 +1215,7 @@
           '',
           'Operación:',
           form.get('message') || '--'
-        ].join('
-');
+        ].join('\n');
 
         window.location.href = 'mailto:praetortechnologies@protonmail.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
       });
