@@ -13,7 +13,7 @@ No se escribió nada en producción ni en PREPROD.
 | `20261027190841` | `fleetops_documents_org_isolation.sql` | Un statement, md5 `508cd910a8bc626837cf6a1ca88fc2e3`, igual al archivo. |
 | `20261027192031` | `driver_invite_storage_upload.sql` | Un statement, md5 `650558fb87f486e0f941c47cd22bf000`, igual al archivo. |
 | `20261027210000` | `storage_policy_cleanup.sql` | Un statement, md5 `06580c40897b4325913645ddb9b727ef`, igual al archivo tras #8 (no la versión de #7). |
-| `20261028000000` | `onboarding_invite_binding.sql` | **Versión distinta**: prod la registró como `20261028002755`. Un statement, md5 `2e270e8b3ceb8b29648128304a671d55`, igual al archivo. |
+| `20261028002755` | `onboarding_invite_binding.sql` | Alineada con prod (renombrada en #12). Un statement, md5 `2e270e8b3ceb8b29648128304a671d55`, igual al archivo. |
 
 T012 estaba versionado `20261027000100`. Con ese nombre, `db push` no reconoce la fila de prod e intentaría aplicar el baseline y T012. El rename iguala la versión; el SQL no cambió.
 
@@ -40,9 +40,9 @@ Estado al 2026-10-27, después de #10. El SQL de `onboarding_invite_binding` est
 
 | | Archivo | Prod | PREPROD |
 |---|---|---|---|
-| onboarding_invite_binding | `20261028000000` | `20261028002755` | `20261028002706` |
+| onboarding_invite_binding | `20261028002755` | `20261028002755` | `20261028002706` |
 
-**Paso 1 · repo (PR aparte).** Renombrar `supabase/migrations/20261028000000_onboarding_invite_binding.sql` a `20261028002755_onboarding_invite_binding.sql`, sin cambiar el contenido. Así prod queda igual al repo sin repair y el md5 de la fila sigue comparándose contra el archivo.
+**Paso 1 · repo: HECHO en #12.** `20261028000000_onboarding_invite_binding.sql` se renombró a `20261028002755_onboarding_invite_binding.sql` sin cambiar el contenido; prod queda igual al repo sin repair.
 
 **Paso 2 · prod.** Sin repair. Verificación:
 
