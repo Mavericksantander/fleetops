@@ -61,11 +61,14 @@ baseline: el panel la llama, pero no forma parte de este historial.
 
 ```bash
 for f in js/*.js scripts/*.mjs; do node --check "$f"; done
+node scripts/test-login-next.mjs
+node scripts/test-build-config.mjs
+SUPABASE_URL=https://example.supabase.co SUPABASE_ANON_KEY=sb_publishable_local npm run build
 ```
 
-El mismo chequeo corre en `.github/workflows/checks.yml`. Los tests SQL
-(`python supabase/tests/local/run_local.py`) necesitan Postgres local y psycopg;
-no están en CI.
+Eso mismo corre en `.github/workflows/checks.yml`, más
+`python supabase/tests/local/run_local.py` contra un Postgres 16. En local el
+SQL necesita Postgres y psycopg.
 
 ## Configuracion local y GitHub
 
