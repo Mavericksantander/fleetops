@@ -55,11 +55,10 @@ const closeDriverProfileButton =
 let currentConductors = [];
 let currentTrips = [];
 let currentRoutes = [];
-let currentConductorDocuments = [];
-let currentTractoDocuments = [];
 let activeOrganizationId = null;
 let activeOrganization = null;
 let canManageDrivers = false;
+let canAssignOperations = false;
 let returnedCompletedTripIds = new Set();
 
 function getReturnedCompletedTripStorageKey() {
@@ -133,6 +132,8 @@ async function initializeOperatorSession() {
         return false;
     }
     canManageDrivers = ["owner", "admin"].includes(membership?.role);
+    // INSERT viajes y finalizar_viaje admiten owner, admin y operator.
+    canAssignOperations = ["owner", "admin", "operator"].includes(membership?.role);
 
     return true;
 
@@ -161,6 +162,10 @@ function normalizePlate(value) {
 }
 
 function openAssignment(conductor) {
+
+    if (!canAssignOperations) {
+        return;
+    }
 
     const activeAssignment =
         getAssignmentByDriver(currentTrips)[conductor.id];
@@ -201,7 +206,6 @@ function renderCompletedPools(trips) {
     trips
         .filter(function (trip) {
             return Boolean(trip.fecha_finalizacion) &&
-                trip.empresa_id === activeOrganizationId &&
                 !returnedCompletedTripIds.has(trip.id);
         })
         .forEach(function (trip) {
@@ -243,7 +247,7 @@ function renderCompletedPools(trips) {
                                     <div class="route-driver-state">FINALIZADO</div>
                                 </div>
                                 <div class="route-driver-meta">VIAJE ${escapeHTML(trip.id)} · ${escapeHTML(trip.empresa || "SIN EMPRESA")}</div>
-                                <button type="button" class="assignment-button reassign-button" data-conductor-id="${escapeHTML(trip.conductor_id || "")}">REASIGNAR</button>
+                                ${canAssignOperations ? `<button type="button" class="assignment-button reassign-button" data-conductor-id="${escapeHTML(trip.conductor_id || "")}">REASIGNAR</button>` : ""}
                                 ${routeName === "SIN RUTA ASOCIADA" ? `<button type="button" class="assignment-button return-available-button" data-trip-id="${escapeHTML(trip.id)}">DEVOLVER A DISPONIBLES</button>` : ""}
                             </article>
                         `;
@@ -637,12 +641,11 @@ function renderDriverCards(drivers, includeAssignmentButtons) {
                     ${escapeHTML(conductor.ciudad || "SIN CIUDAD")} · ${escapeHTML(conductor.tipo_licencia || "SIN LICENCIA")} · ${escapeHTML(conductor.telefono || "SIN TELEFONO")}
                 </div>
                 <button type="button" class="profile-button" data-conductor-id="${escapeHTML(conductor.id)}">VER PERFIL</button>
-                ${includeAssignmentButtons ? `
-                    <button type="button" class="assignment-button" data-conductor-id="${escapeHTML(conductor.id)}">ASIGNAR OPERACIÓN</button>
-                ` : `
-                    <button type="button" class="assignment-button" disabled>VIAJE ACTIVO</button>
-                    <button type="button" class="assignment-button remove-route-button" data-trip-id="${escapeHTML(assignment.id)}">RETIRAR DE RUTA</button>
-                `}
+                ${includeAssignmentButtons
+                    ? (canAssignOperations
+                        ? `<button type="button" class="assignment-button" data-conductor-id="${escapeHTML(conductor.id)}">ASIGNAR OPERACIÓN</button>`
+                        : "")
+                    : `<button type="button" class="assignment-button" disabled>VIAJE ACTIVO</button>${canAssignOperations ? `<button type="button" class="assignment-button remove-route-button" data-trip-id="${escapeHTML(assignment.id)}">RETIRAR DE RUTA</button>` : ""}`}
             </article>
         `;
     }).join("");
@@ -677,8 +680,7 @@ function renderPools(relationships, trips, routes) {
     });
     const activeTrips = trips.filter(function (trip) {
         return Boolean(trip.conductor_id) &&
-            !trip.fecha_finalizacion &&
-            trip.empresa_id === activeOrganizationId;
+            !trip.fecha_finalizacion;
     });
     const operationalByDriver = getAssignmentByDriver(activeTrips);
     const freeDrivers = conductors
@@ -839,9 +841,7 @@ async function loadDriverPool() {
     const [
         driversResponse,
         tripsResponse,
-        routesResponse,
-        conductorDocumentsResponse,
-        tractoDocumentsResponse
+        routesResponse
     ] = await Promise.all([
         supabaseClient
             .from("organization_drivers")
@@ -851,23 +851,14 @@ async function loadDriverPool() {
         supabaseClient
             .from("viajes")
             .select("id, conductor_id, route_id, empresa_id, patente, ruta, empresa, estado, fecha_inicio, fecha_finalizacion, created_at")
+            .eq("empresa_id", activeOrganizationId)
             .order("created_at", { ascending: false }),
 
         supabaseClient
             .from("routes")
             .select("id, organization_id, name, active")
             .eq("organization_id", activeOrganizationId)
-            .order("name"),
-
-        supabaseClient
-            .from("conductor_documentos")
-            .select("id, conductor_id, tipo_documento, storage_path, nombre_archivo, mime_type, tamano_bytes, estado_revision, fecha_carga")
-            .order("fecha_carga", { ascending: false }),
-
-        supabaseClient
-            .from("tracto_documentos")
-            .select("id, tracto_id, tipo_documento, storage_path, nombre_archivo, mime_type, tamano_bytes, estado_revision, fecha_carga")
-            .order("fecha_carga", { ascending: false })
+            .order("name")
     ]);
 
     if (driversResponse.error) {
@@ -881,20 +872,6 @@ async function loadDriverPool() {
     if (routesResponse.error) {
         throw new Error(routesResponse.error.message);
     }
-
-    if (conductorDocumentsResponse.error) {
-        throw new Error(conductorDocumentsResponse.error.message);
-    }
-
-    if (tractoDocumentsResponse.error) {
-        throw new Error(tractoDocumentsResponse.error.message);
-    }
-
-    currentConductorDocuments =
-        conductorDocumentsResponse.data || [];
-
-    currentTractoDocuments =
-        tractoDocumentsResponse.data || [];
 
     renderPools(
         driversResponse.data || [],
@@ -914,6 +891,10 @@ assignmentRoute.addEventListener("change", function () {
 assignmentForm.addEventListener("submit", async function (event) {
 
     event.preventDefault();
+
+    if (!canAssignOperations) {
+        return;
+    }
 
     const conductor =
         currentConductors.find(function (item) {
@@ -1044,6 +1025,10 @@ document.addEventListener("click", function (event) {
         event.target.closest(".remove-route-button");
 
     if (removeRouteButton) {
+        if (!canAssignOperations) {
+            return;
+        }
+
         const confirmed =
             window.confirm("¿Retirar este conductor de la ruta actual?");
 

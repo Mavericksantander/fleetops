@@ -101,6 +101,7 @@ function renderSummary(operations) {
         summaryEnRuta: document.getElementById("summaryEnRuta"),
         summaryEsperandoCarga: document.getElementById("summaryEsperandoCarga"),
         summaryCargando: document.getElementById("summaryCargando"),
+        summaryEsperandoDescarga: document.getElementById("summaryEsperandoDescarga"),
         summaryDescargando: document.getElementById("summaryDescargando"),
         summaryIncidentes: document.getElementById("summaryIncidentes")
     };
@@ -112,6 +113,7 @@ function renderSummary(operations) {
         summaryEnRuta: 0,
         summaryEsperandoCarga: 0,
         summaryCargando: 0,
+        summaryEsperandoDescarga: 0,
         summaryDescargando: 0,
         summaryIncidentes: 0
     };
@@ -127,6 +129,9 @@ function renderSummary(operations) {
         if (status === "Cargando") {
             counts.summaryCargando += 1;
         }
+        if (status === "Esperando descarga") {
+            counts.summaryEsperandoDescarga += 1;
+        }
         if (status === "Descargando") {
             counts.summaryDescargando += 1;
         }
@@ -139,6 +144,7 @@ function renderSummary(operations) {
     summaryNodes.summaryEnRuta.innerText = counts.summaryEnRuta;
     summaryNodes.summaryEsperandoCarga.innerText = counts.summaryEsperandoCarga;
     summaryNodes.summaryCargando.innerText = counts.summaryCargando;
+    summaryNodes.summaryEsperandoDescarga.innerText = counts.summaryEsperandoDescarga;
     summaryNodes.summaryDescargando.innerText = counts.summaryDescargando;
     summaryNodes.summaryIncidentes.innerText = counts.summaryIncidentes;
 }
@@ -301,11 +307,7 @@ async function initializeCustomerDashboard() {
     }
     const customerContext = Array.isArray(customerRows) ? customerRows[0] : customerRows;
     if (!customerContext || customerContext.organization_id !== context.activeOrganization.id) {
-        const { error: signOutError } = await supabaseClient.auth.signOut();
-        if (signOutError) {
-            throw signOutError;
-        }
-        window.location.replace("login.html");
+        window.location.replace("dashboard.html");
         return;
     }
 
