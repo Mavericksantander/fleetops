@@ -6,15 +6,15 @@ Aplicacion web estatica para onboarding de conductores, captura operacional y mo
 
 - `index.html`: landing pública de FleetOps.
 - `reportes.html`: formulario público de reporte de operación por viaje.
-- `driver.html`: onboarding y recuperacion de identidad por RUT.
+- `driver.html`: onboarding de conductores por invitación.
 - `dashboard.html`: dashboard de operaciones y timeline.
 - `customer-dashboard.html`: vista limitada a operaciones autorizadas de clientes.
 - `fleetops-admin.html`: acceso privado para aprovisionar organizaciones y sus primeros owners.
 - `conductores.html`: pool de conductores agrupado por ruta.
 - `routes.html`: organizaciones y rutas configurables por operador.
+- `equipo.html`: equipo de la organización, invitaciones y gestión de clientes.
 - `login.html`: acceso de operadores por email o Google.
 - `success.html`: confirmacion de reportes.
-- `qr.html`: generador de QR para la URL de operación.
 - `404.html`: pagina de recurso no encontrado.
 
 ## JavaScript
@@ -22,11 +22,13 @@ Aplicacion web estatica para onboarding de conductores, captura operacional y mo
 - `js/supabase.js`: instancia unica del cliente Supabase.
 - `js/supabase-config.js`: configuracion local de Supabase; se mantiene fuera de Git.
 - `js/supabase-config.example.js`: plantilla sin credenciales para configurar el proyecto.
+- `js/organization-context.js`: organización activa y membresías del operador.
 - `js/app.js`: GPS, viajes, reportes y finalizacion.
-- `js/driver.js`: onboarding, recuperacion y captura de licencia.
+- `js/driver.js`: onboarding y captura de licencia.
 - `js/dashboard.js`: dashboard, timeline, perfiles y CSV.
 - `js/conductores.js`: pool de conductores por ruta.
 - `js/routes.js`: configuración de organizaciones y rutas.
+- `js/equipo.js`: invitaciones de colaboradores y gestión de clientes.
 - `js/login.js`: autenticacion y redireccion de operadores.
 - `js/customer-dashboard.js`: resumen, operaciones e historial operacional del cliente.
 - `js/fleetops-admin.js`: administración de plataforma restringida al owner global.
@@ -79,6 +81,13 @@ servidor. Nunca pongas una clave `service_role` o `sb_secret_` en archivos
 publicos: esos permisos deben permanecer en un backend. Si alguna clave
 privilegiada estuvo en el codigo o en el historial de Git, revocala y genera una
 nueva en Supabase.
+
+## Build de Vercel
+
+`vercel.json` usa `npm run build` (`scripts/build-config.mjs`). Copia los
+archivos públicos a `dist/` y escribe `dist/js/supabase-config.js` con
+`SUPABASE_URL` y `SUPABASE_ANON_KEY`. El build termina con error si faltan o
+si la clave parece `service_role`.
 
 ## Integridad de eventos operacionales
 

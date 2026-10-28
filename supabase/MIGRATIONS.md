@@ -90,7 +90,7 @@ El resto de objetos creados por `migrations/` aparece en el baseline, pero los c
 
 ## Owner de plataforma
 
-La autorización es la tabla. `is_fleetops_platform_owner()` une `auth.users` con `public.fleetops_platform_owners` si el email está confirmado. En un entorno nuevo, insertar a mano o en un `supabase/seed.sql` no versionado:
+La autorización es la tabla. `is_fleetops_platform_owner()` (baseline; ninguna migración posterior la reemplaza) devuelve verdadero si `auth.uid()` no es nulo y `lower(btrim(coalesce(auth.email(), '')))` está en `public.fleetops_platform_owners.email`. No une `auth.users` ni exige `email_confirmed_at`. El archivo histórico `migrations/2026-10-08-platform-owner-dashboard.sql` sí hacía ese join y pedía email confirmado; ese cuerpo no está en el baseline. En un entorno nuevo, insertar a mano o en un `supabase/seed.sql` no versionado:
 
 ```sql
 insert into public.fleetops_platform_owners (email)
