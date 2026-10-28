@@ -3,13 +3,16 @@
 `supabase db push` aplica solo `supabase/migrations/`, en orden de versión.
 `migrations/` no es historia de Supabase: no ejecutarla.
 
-Consulta de solo lectura a `supabase_migrations.schema_migrations` el 2026-10-27.
+Consulta de solo lectura a `supabase_migrations.schema_migrations` el 2026-10-27, después del merge de #8 (audit nocturno). md5 = `md5(array_to_string(statements, E'\n'))` contra `md5sum` del archivo.
 No se escribió nada en producción ni en PREPROD.
 
 | Versión | Archivo | Producción `sqvmyigzayuqahzmkujn` |
 |---|---|---|
-| `20261027000000` | `baseline_prod_schema.sql` | Ausente. El esquema ya está; no ejecutar este SQL. |
-| `20261027180547` | `t012_rls_hardening.sql` | Única fila. `name = t012_rls_hardening`. Un statement, 15333 bytes, md5 `c5b7d9ab6e42da3d13d505cb4f99cf0e`, igual al archivo. |
+| `20261027000000` | `baseline_prod_schema.sql` | Fila presente con 0 statements: marcada por `migration repair`, el SQL no se ejecutó. No ejecutar este SQL. |
+| `20261027180547` | `t012_rls_hardening.sql` | Un statement, md5 `c5b7d9ab6e42da3d13d505cb4f99cf0e`, igual al archivo. |
+| `20261027190841` | `fleetops_documents_org_isolation.sql` | Un statement, md5 `508cd910a8bc626837cf6a1ca88fc2e3`, igual al archivo. |
+| `20261027192031` | `driver_invite_storage_upload.sql` | Un statement, md5 `650558fb87f486e0f941c47cd22bf000`, igual al archivo. |
+| `20261027210000` | `storage_policy_cleanup.sql` | Un statement, md5 `06580c40897b4325913645ddb9b727ef`, igual al archivo tras #8 (no la versión de #7). |
 
 T012 estaba versionado `20261027000100`. Con ese nombre, `db push` no reconoce la fila de prod e intentaría aplicar el baseline y T012. El rename iguala la versión; el SQL no cambió.
 
@@ -23,9 +26,9 @@ supabase migration repair --linked --project-ref sqvmyigzayuqahzmkujn --status a
 supabase migration list --linked --project-ref sqvmyigzayuqahzmkujn
 ```
 
-Antes, el remoto debe mostrar solo `20261027180547`. Después, local y remoto deben mostrar `20261027000000` y `20261027180547`. No pases `--include-all`: ejecutaría el baseline encima de prod. No repares `20261027180547` (ya aplicada, y el archivo coincide). No repares `20261027000100` (nunca estuvo en prod; el archivo ya no existe).
+Ya ejecutado: prod tiene la fila `20261027000000` sin statements. No repetir. No pases `--include-all`: ejecutaría el baseline encima de prod. No repares `20261027180547` (ya aplicada, y el archivo coincide). No repares `20261027000100` (nunca estuvo en prod; el archivo ya no existe).
 
-PREPROD `xhytykgwkwezkjzfjqoh` tiene otra historia: `20261027171715` `preprod_drop_legacy_empty_schema`, `20261027171724` `baseline_prod_schema`, `20261027171731` `t012_rls_hardening`. Esos comandos no aplican ahí.
+PREPROD `xhytykgwkwezkjzfjqoh` tiene otra historia: `20261027171715` `preprod_drop_legacy_empty_schema`, `20261027171724` `baseline_prod_schema`, `20261027171731` `t012_rls_hardening`, `20261027200128` `fleetops_documents_org_isolation`, `20261027200133` `driver_invite_storage_upload`, `20261027200138` `storage_policy_cleanup`. Las tres últimas tienen el mismo md5 que los archivos; baseline y T012 no. Ninguna versión coincide con un archivo: `supabase db push` contra PREPROD intentaría aplicar los cinco archivos, baseline incluido. No usar `db push` ahí sin antes alinear la historia. Esos comandos de repair no aplican ahí.
 
 ## Por qué sigue `migrations/`
 
