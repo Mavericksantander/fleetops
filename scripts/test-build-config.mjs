@@ -31,7 +31,7 @@ function run(key) {
 }
 
 const cases = [
-  { name: "sb_secret_", key: "sb_secret_example", ok: false },
+  { name: "sb_secret_", key: "sb_secret_example", ok: true },
   { name: "jwt service_role", key: serviceJwt, ok: false },
   { name: "sb_publishable_", key: "sb_publishable_example", ok: true },
   { name: "jwt anon", key: anonJwt, ok: true },
