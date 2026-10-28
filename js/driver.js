@@ -120,6 +120,12 @@ function validateCurrentStep() {
 
 document.querySelectorAll(".next-step").forEach(function (button) {
     button.addEventListener("click", function () {
+        const step = Number(button.closest("[data-step]")?.dataset.step);
+
+        if (step === 2 && !(capturedPhotos.frente && capturedPhotos.reverso && capturedPhotos.selfie)) {
+            return;
+        }
+
         if (validateCurrentStep() && currentStep < onboardingSteps.length) {
             showStep(currentStep + 1);
         }
@@ -161,6 +167,23 @@ const capturedPhotos = {
     selfie: null
 };
 
+const licenseContinueButton =
+    document.querySelector('[data-step="2"] .next-step');
+
+function refreshLicenseContinue() {
+    if (!licenseContinueButton) {
+        return;
+    }
+
+    licenseContinueButton.disabled = !(
+        capturedPhotos.frente &&
+        capturedPhotos.reverso &&
+        capturedPhotos.selfie
+    );
+}
+
+refreshLicenseContinue();
+
 async function loadCameraDevices() {
 
     const devices =
@@ -171,9 +194,14 @@ async function loadCameraDevices() {
             return device.kind === "videoinput";
         });
 
-    cameraSelect.innerHTML = cameras.map(function (camera, index) {
-        return `<option value="${camera.deviceId}">${camera.label || `Cámara ${index + 1}`}</option>`;
-    }).join("");
+    cameraSelect.replaceChildren();
+
+    cameras.forEach(function (camera, index) {
+        const option = document.createElement("option");
+        option.value = camera.deviceId;
+        option.textContent = camera.label || ("Cámara " + (index + 1));
+        cameraSelect.appendChild(option);
+    });
 
     return cameras;
 
@@ -291,6 +319,7 @@ takePhotoButton.addEventListener("click", function () {
         }
 
         capturedPhotos[activeCameraSide] = blob;
+        refreshLicenseContinue();
 
         closeCamera();
     }, "image/jpeg", 0.9);
@@ -342,15 +371,51 @@ async function sha256Hex(value) {
   }).join("");
 }
 
+const ALLOWED_DOCUMENT_TYPES = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  gif: "image/gif",
+  heic: "image/heic",
+  heif: "image/heif",
+  pdf: "application/pdf"
+};
+
+const ALLOWED_DOCUMENT_MIME = new Set(Object.values(ALLOWED_DOCUMENT_TYPES));
+
+function allowlistedContentType(file) {
+  let type = String(file.type || "").toLowerCase();
+
+  if (type === "image/jpg") {
+    type = "image/jpeg";
+  }
+
+  if (ALLOWED_DOCUMENT_MIME.has(type)) {
+    return type;
+  }
+
+  const extension = String(file.name || "").toLowerCase().split(".").pop();
+  const mapped = ALLOWED_DOCUMENT_TYPES[extension];
+
+  if (mapped) {
+    return mapped;
+  }
+
+  throw new Error("El archivo debe ser JPEG, PNG, WEBP, GIF, HEIC, HEIF o PDF.");
+}
+
 async function uploadDocument(file, storagePath) {
   if (!file) {
     throw new Error("Archivo requerido.");
   }
 
+  const contentType = allowlistedContentType(file);
+
   const { error } = await supabaseClient.storage
     .from("fleetops-documents")
     .upload(storagePath, file, {
-      contentType: file.type || "application/octet-stream"
+      contentType
     });
 
   if (error) {
@@ -362,7 +427,7 @@ async function uploadDocument(file, storagePath) {
     );
   }
 
-  return storagePath;
+  return contentType;
 }
 
 // =====================================================
@@ -470,6 +535,9 @@ driverForm.addEventListener(
                 !licencia ||
                 !licencia_vencimiento ||
                 !patente_habitual ||
+                !capturedPhotos.frente ||
+                !capturedPhotos.reverso ||
+                !capturedPhotos.selfie ||
                 !permiso_circulacion ||
                 !soap ||
                 !revision_tecnica ||
@@ -527,7 +595,7 @@ driverForm.addEventListener(
                 const storagePath =
                     `${onboardingPrefix}/equipment/${document.folder}/${crypto.randomUUID()}.${extension}`;
 
-                await uploadDocument(
+                const contentType = await uploadDocument(
                     document.file,
                     storagePath
                 );
@@ -536,7 +604,7 @@ driverForm.addEventListener(
                     tipo_documento: document.tipoDocumento,
                     storage_path: storagePath,
                     nombre_archivo: document.file.name,
-                    mime_type: document.file.type || "application/octet-stream",
+                    mime_type: contentType,
                     tamano_bytes: document.file.size
                 });
             }
@@ -573,7 +641,7 @@ driverForm.addEventListener(
                 const storagePath =
                     `${onboardingPrefix}/drivers/${document.folder}/${crypto.randomUUID()}.jpg`;
 
-                await uploadDocument(
+                const contentType = await uploadDocument(
                     file,
                     storagePath
                 );
@@ -582,7 +650,7 @@ driverForm.addEventListener(
                     tipo_documento: document.tipoDocumento,
                     storage_path: storagePath,
                     nombre_archivo: file.name,
-                    mime_type: file.type || "image/jpeg",
+                    mime_type: contentType,
                     tamano_bytes: file.size
                 });
             }
@@ -685,8 +753,19 @@ function showSuccess(
     }
 
     if (operationLink) {
-        operationLink.href =
-            `reportes.html?driver_id=${encodeURIComponent(driverId)}`;
+        const viaje =
+            new URLSearchParams(window.location.search).get("viaje")?.trim() || "";
+
+        if (!viaje) {
+            operationLink.hidden = true;
+            operationLink.removeAttribute("href");
+        } else {
+            const params = new URLSearchParams();
+            params.set("viaje", viaje);
+            params.set("driver_id", driverId);
+            operationLink.hidden = false;
+            operationLink.href = `reportes.html?${params.toString()}`;
+        }
     }
 
     driverForm.style.display = "none";

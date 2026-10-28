@@ -13,6 +13,7 @@ if not skip:
     files.append(root/'tests/storage_org_isolation_test.sql')
     files.append(root/'tests/anon_storage_policies_test.sql')
     files.append(root/'tests/onboarding_invite_binding_test.sql')
+    files.append(root/'tests/onboarding_same_org_guard_test.sql')
     files.append(root/'tests/resolve_viaje_public_test.sql')
     files.append(root/'tests/tractos_insert_returning_test.sql')
     files.append(root/'tests/report_identity_tracto_invite_test.sql')
