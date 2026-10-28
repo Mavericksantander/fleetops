@@ -12,7 +12,11 @@ end $$;
 create schema if not exists auth;
 create schema if not exists extensions;
 create extension if not exists pgcrypto with schema extensions;
-create table if not exists auth.users (id uuid primary key, email text);
+create table if not exists auth.users (
+    id uuid primary key,
+    email text,
+    email_confirmed_at timestamptz
+);
 create or replace function auth.uid() returns uuid language sql stable as
 $$ select nullif(nullif(current_setting('request.jwt.claims', true),'')::json->>'sub','')::uuid $$;
 create or replace function auth.email() returns text language sql stable as
