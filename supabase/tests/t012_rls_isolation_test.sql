@@ -36,6 +36,8 @@ insert into public.tracto_documentos(tracto_id, tipo_documento, storage_path) va
 insert into public.viajes(id, patente, conductor, conductor_id, empresa, empresa_id, ruta) values
  ('fa000000-0000-0000-0000-000000000000','AAAA11','Conductor A','ca000000-0000-0000-0000-000000000000','Org A','0000000a-0000-0000-0000-000000000000','Ruta A'),
  ('fb000000-0000-0000-0000-000000000000','BBBB22','Conductor B','cb000000-0000-0000-0000-000000000000','Org B','0000000b-0000-0000-0000-000000000000','Ruta B');
+insert into public.customers(id, organization_id, name) values
+ ('c0000000-0000-0000-0000-00000000000a','0000000a-0000-0000-0000-000000000000','Cliente A');
 insert into public.reportes(conductor, conductor_id, patente, empresa, ruta, estado, latitud, longitud, viaje_id) values
  ('Conductor A','ca000000-0000-0000-0000-000000000000','AAAA11','Org A','Ruta A','En ruta',-23.6,-70.4,'fa000000-0000-0000-0000-000000000000'),
  ('Conductor B','cb000000-0000-0000-0000-000000000000','BBBB22','Org B','Ruta B','En ruta',-24.1,-70.2,'fb000000-0000-0000-0000-000000000000');
