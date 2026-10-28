@@ -184,6 +184,20 @@ function getTripIdFromUrl(){
 
 }
 
+function successHref(){
+
+    const viaje =
+        getTripIdFromUrl();
+
+    if(!viaje){
+        return "success.html";
+    }
+
+    return "success.html?viaje=" +
+        encodeURIComponent(viaje);
+
+}
+
 function getStoredDriverId(){
 
     const queryDriverId =
@@ -1117,7 +1131,7 @@ fleetForm.addEventListener(
                 }
 
                 window.location.replace(
-                    "success.html"
+                    successHref()
                 );
 
                 return;
@@ -1351,7 +1365,7 @@ fleetForm.addEventListener(
 
 
             window.location.replace(
-                "success.html"
+                successHref()
             );
 
         }
