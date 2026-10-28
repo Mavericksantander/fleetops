@@ -12,6 +12,7 @@ files = [root/'tests/local/00_supabase_shim.sql', *migrations, root/'tests/t012_
 if not skip:
     files.append(root/'tests/storage_org_isolation_test.sql')
     files.append(root/'tests/anon_storage_policies_test.sql')
+    files.append(root/'tests/onboarding_invite_binding_test.sql')
 with psycopg.connect(sys.argv[1], autocommit=True) as c:
     c.add_notice_handler(lambda d: print('  NOTICE:', d.message_primary))
     for f in files:
