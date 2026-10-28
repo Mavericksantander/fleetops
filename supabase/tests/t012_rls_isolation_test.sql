@@ -135,6 +135,10 @@ do $$ declare n int; begin
   values ('Torre A','AAAA11','Org A','Ruta A','En ruta','fa000000-0000-0000-0000-000000000000');
   update public.conductores set ciudad = 'Antofagasta' where id = 'ca000000-0000-0000-0000-000000000000';
   get diagnostics n = row_count; assert n = 1, 'org A no puede editar su conductor';
+  select count(*) into n from public.viajes where id = 'fb000000-0000-0000-0000-000000000000';
+  assert n = 0, 'org A ve viaje de org B';
+  select count(*) into n from public.organizations where id = '0000000b-0000-0000-0000-000000000000';
+  assert n = 0, 'org A ve la organización B';
   raise notice 'ORG A (owner): OK — ve solo lo suyo, no lee ni escribe datos de org B';
 end $$;
 
@@ -162,6 +166,8 @@ do $$ declare n int; begin
   select count(*) into n from public.tracto_documentos;     assert n = 1, 'org B: tracto_documentos <> 1';
   select count(*) into n from public.reportes where viaje_id = 'fa000000-0000-0000-0000-000000000000';
   assert n = 0, 'org B ve reportes de org A';
+  select count(*) into n from public.viajes where id = 'fa000000-0000-0000-0000-000000000000';
+  assert n = 0, 'org B ve viaje de org A';
   raise notice 'ORG B (owner): OK — no ve datos de org A';
 end $$;
 
@@ -172,7 +178,12 @@ do $$ declare n int; begin
        + (select count(*) from public.tractos) + (select count(*) from public.conductor_documentos)
        + (select count(*) from public.tracto_documentos) into n;
   assert n = 0, format('usuario sin organización ve %s filas', n);
-  raise notice 'SIN ORG: OK — 0 filas en conductores/reportes/tractos/documentos';
+  select (select count(*) from public.viajes) + (select count(*) from public.organizations)
+       + (select count(*) from public.organization_members) + (select count(*) from public.customers) into n;
+  assert n = 0, format('usuario sin organización ve %s filas en viajes/organizations/members/customers', n);
+  update public.viajes set ruta = 'X';
+  get diagnostics n = row_count; assert n = 0, 'usuario sin organización modificó viajes';
+  raise notice 'SIN ORG: OK — 0 filas en conductores/reportes/tractos/documentos/viajes/organizations/customers';
 end $$;
 
 reset role;
