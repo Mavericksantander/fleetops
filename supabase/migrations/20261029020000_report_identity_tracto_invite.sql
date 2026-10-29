@@ -1,5 +1,5 @@
 -- submit_driver_report exige patente normalizada y un conductor resuelto.
--- conductores_update_org rechaza un tracto_id cuya organization_id no es del usuario.
+-- Un cambio de tracto_id exige que el tracto destino tenga organization_id de la org del usuario.
 -- consume_organization_driver_invite queda sin EXECUTE para el API.
 -- finalizar_viaje(text) se elimina.
 begin;
@@ -94,25 +94,37 @@ begin
 end;
 $$;
 
-drop policy if exists conductores_update_org on public.conductores;
-create policy conductores_update_org on public.conductores
-    for update to authenticated
-    using (private.can_access_conductor(id, array['owner','admin','operator']))
-    with check (
-        private.can_access_conductor(id, array['owner','admin','operator'])
-        and (
-            tracto_id is null
-            or exists (
-                select 1
-                  from public.tractos t
-                 where t.id = tracto_id
-                   and public.user_has_org_role(
-                       t.organization_id,
-                       array['owner','admin','operator']
-                   )
-            )
-        )
-    );
+create or replace function private.conductores_tracto_org()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_catalog
+as $$
+begin
+    if new.tracto_id is not null and not exists (
+        select 1
+          from public.tractos t
+         where t.id = new.tracto_id
+           and t.organization_id is not null
+           and public.user_has_org_role(
+               t.organization_id,
+               array['owner','admin','operator']
+           )
+    ) then
+        raise exception 'El tracto no pertenece a la organización.' using errcode = '42501';
+    end if;
+    return new;
+end;
+$$;
+
+revoke all on function private.conductores_tracto_org() from public, anon, authenticated;
+
+drop trigger if exists conductores_tracto_org on public.conductores;
+create trigger conductores_tracto_org
+    before update on public.conductores
+    for each row
+    when (old.tracto_id is distinct from new.tracto_id)
+    execute function private.conductores_tracto_org();
 
 revoke execute on function public.consume_organization_driver_invite(text, text, text, text, text, text, text)
     from public, anon, authenticated;

@@ -15,13 +15,16 @@ insert into public.organization_members(organization_id, user_id, role) values
 insert into public.tractos(id, patente, organization_id) values
  ('e17a0000-0000-4000-8000-000000000001','SEC0A1','e100000a-0000-4000-8000-000000000000'),
  ('e17a0000-0000-4000-8000-000000000002','SEC0A2','e100000a-0000-4000-8000-000000000000'),
- ('e17b0000-0000-4000-8000-000000000001','SEC0B1','e100000b-0000-4000-8000-000000000000');
+ ('e17b0000-0000-4000-8000-000000000001','SEC0B1','e100000b-0000-4000-8000-000000000000'),
+ ('e17c0000-0000-4000-8000-000000000001','SEC0C1', null);
 insert into public.conductores(id, driver_id, nombre, telefono, rut, tracto_id) values
  ('e1ca0000-0000-4000-8000-000000000001','FLE-E1A1','Conductor Sec A','+56900000091','91.111.111-1','e17a0000-0000-4000-8000-000000000001'),
- ('e1ca0000-0000-4000-8000-000000000002','FLE-E1A2','Conductor Sec A2','+56900000092','92.222.222-2','e17b0000-0000-4000-8000-000000000001');
+ ('e1ca0000-0000-4000-8000-000000000002','FLE-E1A2','Conductor Sec A2','+56900000092','92.222.222-2','e17b0000-0000-4000-8000-000000000001'),
+ ('e1ca0000-0000-4000-8000-000000000003','FLE-E1C1','Conductor Sec C','+56900000093','93.333.333-3','e17c0000-0000-4000-8000-000000000001');
 insert into public.organization_drivers(organization_id, conductor_id, status) values
  ('e100000a-0000-4000-8000-000000000000','e1ca0000-0000-4000-8000-000000000001','ACTIVE'),
- ('e100000a-0000-4000-8000-000000000000','e1ca0000-0000-4000-8000-000000000002','ACTIVE');
+ ('e100000a-0000-4000-8000-000000000000','e1ca0000-0000-4000-8000-000000000002','ACTIVE'),
+ ('e100000a-0000-4000-8000-000000000000','e1ca0000-0000-4000-8000-000000000003','ACTIVE');
 insert into public.viajes(id, patente, conductor, conductor_id, empresa, empresa_id, ruta) values
  ('e1fa0000-0000-4000-8000-000000000001','SEC0A1','Conductor Sec A','e1ca0000-0000-4000-8000-000000000001','Sec Org A','e100000a-0000-4000-8000-000000000000','Ruta Sec');
 
@@ -74,11 +77,21 @@ begin
     perform pg_temp.sec_fail('el fixture no hace visible el tracto de la otra org');
   end if;
 
-  update public.conductores set ciudad = 'Calama'
-   where id = 'e1ca0000-0000-4000-8000-000000000001';
-  get diagnostics n = row_count;
-  if n <> 1 then
-    perform pg_temp.sec_fail('no pudo editar su conductor');
+  begin
+    update public.conductores set ciudad = 'Calama'
+     where id = 'e1ca0000-0000-4000-8000-000000000003';
+    get diagnostics n = row_count;
+    if n <> 1 then
+      perform pg_temp.sec_fail('editar ciudad con tracto sin org no actualizó');
+    end if;
+  exception
+    when others then
+      perform pg_temp.sec_fail('editar ciudad con tracto sin org falló con ' || sqlstate);
+  end;
+  select tracto_id into tid from public.conductores
+   where id = 'e1ca0000-0000-4000-8000-000000000003';
+  if tid is distinct from 'e17c0000-0000-4000-8000-000000000001' then
+    perform pg_temp.sec_fail('editar ciudad cambió el tracto a ' || coalesce(tid::text, 'null'));
   end if;
 
   update public.conductores set tracto_id = 'e17a0000-0000-4000-8000-000000000002'
@@ -96,6 +109,16 @@ begin
   exception
     when insufficient_privilege then null;
     when others then perform pg_temp.sec_fail('retarget a otra org falló con ' || sqlstate);
+  end;
+
+  begin
+    update public.conductores set tracto_id = 'e17c0000-0000-4000-8000-000000000001'
+     where id = 'e1ca0000-0000-4000-8000-000000000001';
+    get diagnostics n = row_count;
+    perform pg_temp.sec_fail(format('retarget a tracto sin org fue aceptado (%s)', n));
+  exception
+    when insufficient_privilege then null;
+    when others then perform pg_temp.sec_fail('retarget a tracto sin org falló con ' || sqlstate);
   end;
 
   select tracto_id into tid from public.conductores
@@ -170,5 +193,5 @@ begin
   if s is not null then
     raise exception '%', s;
   end if;
-  raise notice 'OK — reporte sin identidad rechazado, tracto de otra org rechazado, consume sin EXECUTE, finalizar_viaje(text) eliminada';
+  raise notice 'OK — reporte sin identidad rechazado, ciudad editable con tracto sin org, retarget a otra org o sin org rechazado, consume sin EXECUTE, finalizar_viaje(text) eliminada';
 end $$;

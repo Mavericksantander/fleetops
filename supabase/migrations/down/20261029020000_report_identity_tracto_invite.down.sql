@@ -91,11 +91,8 @@ begin
 end;
 $$;
 
-drop policy if exists conductores_update_org on public.conductores;
-create policy conductores_update_org on public.conductores
-    for update to authenticated
-    using (private.can_access_conductor(id, array['owner','admin','operator']))
-    with check (private.can_access_conductor(id, array['owner','admin','operator']));
+drop trigger if exists conductores_tracto_org on public.conductores;
+drop function if exists private.conductores_tracto_org();
 
 grant execute on function public.consume_organization_driver_invite(text, text, text, text, text, text, text)
     to authenticated;
