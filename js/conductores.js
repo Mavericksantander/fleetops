@@ -60,33 +60,7 @@ let currentTractoDocuments = [];
 let activeOrganizationId = null;
 let activeOrganization = null;
 let canManageDrivers = false;
-let returnedCompletedTripIds = new Set();
-
-function getReturnedCompletedTripStorageKey() {
-    return `fleetops.returned_completed_trips.${activeOrganizationId}`;
-}
-
-function loadReturnedCompletedTripIds() {
-    try {
-        const stored = JSON.parse(
-            localStorage.getItem(getReturnedCompletedTripStorageKey()) || "[]"
-        );
-        returnedCompletedTripIds = new Set(
-            Array.isArray(stored) ? stored : []
-        );
-    }
-    catch (error) {
-        console.warn("No fue posible cargar conductores devueltos a disponibles:", error);
-        returnedCompletedTripIds = new Set();
-    }
-}
-
-function saveReturnedCompletedTripIds() {
-    localStorage.setItem(
-        getReturnedCompletedTripStorageKey(),
-        JSON.stringify([...returnedCompletedTripIds])
-    );
-}
+let canAssignOperations = false;
 
 function escapeHTML(value) {
     return String(value ?? "")
@@ -118,7 +92,6 @@ async function initializeOperatorSession() {
 
     activeOrganizationId = context.activeOrganization.id;
     activeOrganization = context.activeOrganization;
-    loadReturnedCompletedTripIds();
     const { data: membership, error } = await supabaseClient
         .from("organization_members")
         .select("role")
@@ -133,6 +106,7 @@ async function initializeOperatorSession() {
         return false;
     }
     canManageDrivers = ["owner", "admin"].includes(membership?.role);
+    canAssignOperations = ["owner", "admin", "operator"].includes(membership?.role);
 
     return true;
 
@@ -201,8 +175,7 @@ function renderCompletedPools(trips) {
     trips
         .filter(function (trip) {
             return Boolean(trip.fecha_finalizacion) &&
-                trip.empresa_id === activeOrganizationId &&
-                !returnedCompletedTripIds.has(trip.id);
+                trip.empresa_id === activeOrganizationId;
         })
         .forEach(function (trip) {
             const routeName = trip.ruta || "SIN RUTA ASOCIADA";
@@ -244,7 +217,6 @@ function renderCompletedPools(trips) {
                                 </div>
                                 <div class="route-driver-meta">VIAJE ${escapeHTML(trip.id)} · ${escapeHTML(trip.empresa || "SIN EMPRESA")}</div>
                                 <button type="button" class="assignment-button reassign-button" data-conductor-id="${escapeHTML(trip.conductor_id || "")}">REASIGNAR</button>
-                                ${routeName === "SIN RUTA ASOCIADA" ? `<button type="button" class="assignment-button return-available-button" data-trip-id="${escapeHTML(trip.id)}">DEVOLVER A DISPONIBLES</button>` : ""}
                             </article>
                         `;
                     }).join("")}
@@ -638,10 +610,10 @@ function renderDriverCards(drivers, includeAssignmentButtons) {
                 </div>
                 <button type="button" class="profile-button" data-conductor-id="${escapeHTML(conductor.id)}">VER PERFIL</button>
                 ${includeAssignmentButtons ? `
-                    <button type="button" class="assignment-button" data-conductor-id="${escapeHTML(conductor.id)}">ASIGNAR OPERACIÓN</button>
+                    ${canAssignOperations ? `<button type="button" class="assignment-button" data-conductor-id="${escapeHTML(conductor.id)}">ASIGNAR OPERACIÓN</button>` : ""}
                 ` : `
                     <button type="button" class="assignment-button" disabled>VIAJE ACTIVO</button>
-                    <button type="button" class="assignment-button remove-route-button" data-trip-id="${escapeHTML(assignment.id)}">RETIRAR DE RUTA</button>
+                    ${canAssignOperations ? `<button type="button" class="assignment-button remove-route-button" data-trip-id="${escapeHTML(assignment.id)}">RETIRAR DE RUTA</button>` : ""}
                 `}
             </article>
         `;
@@ -1000,17 +972,6 @@ document.addEventListener("click", function (event) {
         return;
     }
 
-    const returnAvailableButton =
-        event.target.closest(".return-available-button");
-
-    if (returnAvailableButton) {
-        const tripId = returnAvailableButton.dataset.tripId;
-        returnedCompletedTripIds.add(tripId);
-        saveReturnedCompletedTripIds();
-        renderCompletedPools(currentTrips);
-        return;
-    }
-
     const approveButton = event.target.closest(".approve-driver-button");
     const rejectButton = event.target.closest(".reject-driver-button");
 
@@ -1044,6 +1005,10 @@ document.addEventListener("click", function (event) {
         event.target.closest(".remove-route-button");
 
     if (removeRouteButton) {
+        if (!canAssignOperations) {
+            return;
+        }
+
         const confirmed =
             window.confirm("¿Retirar este conductor de la ruta actual?");
 
@@ -1084,6 +1049,10 @@ document.addEventListener("click", function (event) {
         event.target.closest(".assignment-button");
 
     if (button && !button.disabled) {
+        if (!canAssignOperations && !button.classList.contains("reassign-button")) {
+            return;
+        }
+
         const conductor =
             currentConductors.find(function (item) {
                 return item.id === button.dataset.conductorId;
@@ -1114,6 +1083,20 @@ document.addEventListener("keydown", function (event) {
         driverProfileModal.hidden = true;
     }
 });
+
+const logoutButton = document.getElementById("logoutButton");
+
+if (logoutButton) {
+    logoutButton.addEventListener("click", async function () {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) {
+            connectionText.innerText = error.message || "No fue posible cerrar la sesión.";
+            return;
+        }
+        clearActiveOrganizationId();
+        window.location.replace("login.html");
+    });
+}
 
 initializeOperatorSession()
     .then(function (authenticated) {

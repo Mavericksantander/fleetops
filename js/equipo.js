@@ -112,7 +112,7 @@ function renderCustomers() {
                 ? accessRows.map(access => `
                     <div class="customer-access-row">
                         <span>${escapeTeamText(getAccessLabel(access))}</span>
-                        <button type="button" class="text-action" data-action="revoke-access" data-access-id="${escapeTeamText(access.id)}">REVOCAR</button>
+                        ${canManageCustomers ? `<button type="button" class="text-action" data-action="revoke-access" data-access-id="${escapeTeamText(access.id)}">REVOCAR</button>` : ""}
                     </div>
                 `).join("")
                 : '<div class="team-email">Sin operaciones autorizadas</div>';
@@ -144,10 +144,10 @@ function renderCustomers() {
                 </div>
                 ${inviteHtml ? `<div class="customer-invites">${inviteHtml}</div>` : ""}
                 <div class="customer-access-list">${accessHtml}</div>
-                <div class="customer-actions">
+                ${canManageCustomers ? `<div class="customer-actions">
                     ${customer.is_active ? `<button type="button" class="text-action" data-action="invite-customer" data-customer-id="${escapeTeamText(customer.id)}">INVITAR USUARIO</button>` : ""}
                     <button type="button" class="text-action" data-action="toggle-customer" data-customer-id="${escapeTeamText(customer.id)}" data-active="${customer.is_active ? "true" : "false"}">${customer.is_active ? "DESACTIVAR CLIENTE" : "ACTIVAR CLIENTE"}</button>
-                </div>`;
+                </div>` : ""}`;
             customerList.appendChild(item);
         });
     }
@@ -343,7 +343,7 @@ inviteRole.addEventListener("change", function () {
 
 customerList.addEventListener("click", async function (event) {
     const button = event.target.closest("[data-action]");
-    if (!button) {
+    if (!button || !canManageCustomers) {
         return;
     }
 
@@ -464,6 +464,20 @@ inviteForm.addEventListener("submit", async function (event) {
     generateInviteButton.disabled = false;
     generateInviteButton.innerText = "GENERAR INVITACIÓN";
 });
+
+const logoutButton = document.getElementById("logoutButton");
+
+if (logoutButton) {
+    logoutButton.addEventListener("click", async function () {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) {
+            teamError.innerText = error.message || "No fue posible cerrar la sesión.";
+            return;
+        }
+        clearActiveOrganizationId();
+        window.location.replace("login.html");
+    });
+}
 
 copyInviteButton.addEventListener("click", async function () {
     await navigator.clipboard.writeText(inviteUrl.value);

@@ -42,8 +42,6 @@ input:focus,select:focus{border-color:var(--accent);}
 .step.active{border-color:var(--accent);color:var(--white);}
 .step-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .back-step{padding:16px;background:var(--panel2);border:1px solid var(--border);color:var(--white);font-weight:700;cursor:pointer;}
-.recover-button{width:100%;padding:12px;background:transparent;border:1px solid var(--border);color:var(--steel);font-family:"JetBrains Mono";font-size:10px;letter-spacing:.5px;cursor:pointer;}
-.recover-button:hover{border-color:var(--white);color:var(--white);}
 .camera-capture{display:grid;gap:10px;margin-bottom:18px;}
 .camera-select{margin-bottom:0;}
 .camera-preview{width:100%;display:none;background:#000;border:1px solid var(--border);aspect-ratio:4 / 3;object-fit:cover;}
@@ -104,8 +102,6 @@ input:focus,select:focus{border-color:var(--accent);}
 
       <label>CIUDAD</label>
       <input name="ciudad" placeholder="Antofagasta" required>
-
-      <button type="button" class="recover-button" id="recoverDriverButton">YA TENGO PERFIL · RECUPERAR</button>
       </div>
       <button type="button" class="send next-step">CONTINUAR</button>
     </section>

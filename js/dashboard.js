@@ -2505,10 +2505,18 @@ function downloadTripReport(tripId) {
 
     function escapeCSV(value) {
 
-        const stringValue =
+        let stringValue =
             String(value ?? "");
 
+        const formula =
+            /^[=+\-@\t\r]/.test(stringValue);
+
+        if (formula) {
+            stringValue = "'" + stringValue;
+        }
+
         if (
+            formula ||
             /[",\r\n]/.test(
                 stringValue
             )
@@ -2686,3 +2694,17 @@ setInterval(
     updateLiveDurations,
     1000
 );
+
+const logoutButton = document.getElementById("logoutButton");
+
+if (logoutButton) {
+    logoutButton.addEventListener("click", async function () {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) {
+            connectionText.innerText = error.message || "No fue posible cerrar la sesión.";
+            return;
+        }
+        clearActiveOrganizationId();
+        window.location.replace("login.html");
+    });
+}

@@ -12,9 +12,6 @@ const driverForm =
 const successScreen =
     document.getElementById("successScreen");
 
-const recoverDriverButton =
-    document.getElementById("recoverDriverButton");
-
 const inviteStatus =
     document.getElementById("inviteStatus");
 
@@ -325,13 +322,6 @@ function normalizeRut(value) {
         .toUpperCase();
 
 }
-
-if (recoverDriverButton) {
-    recoverDriverButton.addEventListener("click", async function () {
-        alert("La recuperación requiere una invitación de la empresa.");
-    });
-}
-
 
 async function sha256Hex(value) {
   const encoded = new TextEncoder().encode(value);

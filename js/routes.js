@@ -71,4 +71,18 @@ routeForm.addEventListener("submit",async function(event){
     await loadRouteData();
 });
 
+const logoutButton = document.getElementById("logoutButton");
+
+if (logoutButton) {
+    logoutButton.addEventListener("click", async function () {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) {
+            routeError.innerText = error.message || "No fue posible cerrar la sesión.";
+            return;
+        }
+        clearActiveOrganizationId();
+        window.location.replace("login.html");
+    });
+}
+
 requireOperator().then(function(authenticated){if(authenticated){return loadRouteData();}}).catch(function(error){console.error("FLEETOPS ROUTES ERROR",error);routesContainer.innerHTML="<div class=\"empty-state\"><div class=\"empty-title\">NO FUE POSIBLE CARGAR RUTAS</div></div>";});
