@@ -14,6 +14,7 @@ if not skip:
     files.append(root/'tests/anon_storage_policies_test.sql')
     files.append(root/'tests/onboarding_invite_binding_test.sql')
     files.append(root/'tests/resolve_viaje_public_test.sql')
+    files.append(root/'tests/report_identity_tracto_invite_test.sql')
 with psycopg.connect(sys.argv[1], autocommit=True) as c:
     c.add_notice_handler(lambda d: print('  NOTICE:', d.message_primary))
     for f in files:
