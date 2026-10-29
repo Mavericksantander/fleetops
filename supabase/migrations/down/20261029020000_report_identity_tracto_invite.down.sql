@@ -94,8 +94,13 @@ $$;
 drop trigger if exists conductores_tracto_org on public.conductores;
 drop function if exists private.conductores_tracto_org();
 
+-- Restaura el orden original del ACL (postgres, authenticated, service_role).
+revoke execute on function public.consume_organization_driver_invite(text, text, text, text, text, text, text)
+    from service_role;
 grant execute on function public.consume_organization_driver_invite(text, text, text, text, text, text, text)
     to authenticated;
+grant execute on function public.consume_organization_driver_invite(text, text, text, text, text, text, text)
+    to service_role;
 
 create or replace function public.finalizar_viaje(p_patente text)
  returns boolean

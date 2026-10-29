@@ -97,23 +97,53 @@ $$;
 create or replace function private.conductores_tracto_org()
 returns trigger
 language plpgsql
-security definer
+-- SECURITY INVOKER a propósito: current_user es el rol que ejecuta la
+-- sentencia (anon/authenticated desde el API, bajo RLS; o el dueño de una
+-- función SECURITY DEFINER como complete_organization_driver_onboarding).
 set search_path = public, pg_catalog
 as $$
+declare
+    v_api boolean := current_user in ('anon', 'authenticated');
+    v_org uuid;
 begin
-    if new.tracto_id is not null and not exists (
-        select 1
-          from public.tractos t
-         where t.id = new.tracto_id
-           and t.organization_id is not null
-           and public.user_has_org_role(
-               t.organization_id,
-               array['owner','admin','operator']
-           )
-    ) then
+    if new.tracto_id is null then
+        return new;
+    end if;
+
+    select t.organization_id into v_org from public.tractos t where t.id = new.tracto_id;
+    if not found then
         raise exception 'El tracto no pertenece a la organización.' using errcode = '42501';
     end if;
-    return new;
+
+    -- 1) Usuario con rol en la org del tracto.
+    if v_org is not null
+       and public.user_has_org_role(v_org, array['owner','admin','operator']) then
+        return new;
+    end if;
+
+    -- 2) Ruta interna SECURITY DEFINER (alta por invitación), nunca desde el API:
+    --    el tracto es de una org del propio conductor, o no tiene org y no está
+    --    asignado a un conductor vinculado a una org ajena a este conductor.
+    if not v_api and (
+        (v_org is not null and exists (
+            select 1 from public.organization_drivers od
+             where od.conductor_id = new.id
+               and od.organization_id = v_org
+               and od.status in ('PENDING','ACTIVE')))
+        or
+        (v_org is null and not exists (
+            select 1 from public.conductores c2
+              join public.organization_drivers od2 on od2.conductor_id = c2.id
+             where c2.tracto_id = new.tracto_id
+               and c2.id <> new.id
+               and od2.organization_id not in (
+                   select od3.organization_id from public.organization_drivers od3
+                    where od3.conductor_id = new.id)))
+    ) then
+        return new;
+    end if;
+
+    raise exception 'El tracto no pertenece a la organización.' using errcode = '42501';
 end;
 $$;
 
