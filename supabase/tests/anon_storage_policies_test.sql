@@ -86,8 +86,14 @@ begin
          'authenticated ejecuta una función nueva de private';
   assert not has_function_privilege('public', 'private.probe_default_execute()', 'execute'),
          'public ejecuta una función nueva de private';
-  assert has_function_privilege('anon', 'public.probe_public_default_execute()', 'execute'),
-         'anon perdió el default de las funciones nuevas de public';
+  assert not has_function_privilege('anon', 'public.probe_public_default_execute()', 'execute'),
+         'anon ejecuta una función nueva de public';
+  assert not has_function_privilege('public', 'public.probe_public_default_execute()', 'execute'),
+         'public ejecuta una función nueva de public';
+  assert has_function_privilege('authenticated', 'public.probe_public_default_execute()', 'execute'),
+         'authenticated perdió el default de las funciones nuevas de public';
+  assert has_function_privilege('service_role', 'public.probe_public_default_execute()', 'execute'),
+         'service_role perdió el default de las funciones nuevas de public';
   assert has_function_privilege('anon', 'public.resolve_viaje_public(uuid)', 'execute'),
          'anon perdió resolve_viaje_public';
   assert has_function_privilege('anon', 'public.submit_driver_report(uuid,text,text,text,text,text,text,text,double precision,double precision,double precision,text,text)', 'execute'),
@@ -100,7 +106,7 @@ begin
          'anon perdió get_member_invite_context';
   assert has_function_privilege('anon', 'public.get_customer_member_invite_context(text)', 'execute'),
          'anon perdió get_customer_member_invite_context';
-  assert not has_function_privilege('anon', 'public.create_member_invite(text,text)', 'execute'),
+  assert not has_function_privilege('anon', 'public.create_member_invite(uuid,text,text)', 'execute'),
          'anon ejecuta create_member_invite';
 
   select count(*) into n from pg_default_acl where defaclnamespace = 0;
@@ -116,7 +122,7 @@ begin
     join pg_namespace nsp on nsp.oid = d.defaclnamespace
    where nsp.nspname = 'private';
   assert n = 0, 'quedó un default privileges en el schema private';
-  raise notice 'PRIVILEGIOS: OK — anon solo ejecuta driver_invite_may_upload en private; los RPC públicos de la demo siguen';
+  raise notice 'PRIVILEGIOS: OK — anon no ejecuta funciones nuevas de public ni de private, salvo driver_invite_may_upload; los RPC con GRANT explícito siguen';
 end $$;
 
 drop function private.probe_default_execute();

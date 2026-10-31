@@ -6,9 +6,8 @@ create table if not exists public.fleetops_platform_owners (
     constraint fleetops_platform_owner_email_lowercase check (email = lower(btrim(email)))
 );
 
-insert into public.fleetops_platform_owners (email)
-values ('joseto.maverick@gmail.com')
-on conflict (email) do nothing;
+-- Sin INSERT: el email del owner no se versiona. El alta anterior queda
+-- solo en el historial de git; no reaplicarla.
 
 alter table public.fleetops_platform_owners enable row level security;
 revoke all on table public.fleetops_platform_owners from anon, authenticated;
