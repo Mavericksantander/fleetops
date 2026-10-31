@@ -80,14 +80,19 @@ baseline, y el panel ya no la llama.
 
 ```bash
 for f in js/*.js scripts/*.mjs; do node --check "$f"; done
+npm test
+node scripts/test-login-next.mjs
+node scripts/test-build-config.mjs
+SUPABASE_URL=https://example.supabase.co SUPABASE_ANON_KEY=sb_publishable_local npm run build
 ```
 
-`.github/workflows/checks.yml` corre ese chequeo y `npm test` (tests de
-frontend en `tests/frontend/*.test.mjs`, p. ej. el tracto ligado al conductor
-de #30). Los tests SQL (`python supabase/tests/local/run_local.py "dbname=..."`)
-aplican shim, migraciones y `supabase/tests/*.sql` (aislamiento RLS de dos
-tenants y usuario sin org de #24, más los tests de #25, #26 y #28). Necesitan
-Postgres local y psycopg; no están en CI.
+`.github/workflows/checks.yml` corre esos mismos chequeos, incluido `npm test`
+(tests de frontend en `tests/frontend/*.test.mjs`, p. ej. el tracto ligado al
+conductor de #30). También corre en CI, contra un Postgres 16, la suite SQL
+(`python supabase/tests/local/run_local.py "dbname=..."`): aplica shim,
+migraciones y `supabase/tests/*.sql` (aislamiento RLS de dos tenants y usuario
+sin org de #24, más los tests de #25, #26 y #28). En local, el SQL necesita
+Postgres y psycopg.
 
 ## Configuracion local y GitHub
 
