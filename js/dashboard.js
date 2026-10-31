@@ -246,6 +246,22 @@ function escapeHTML(value) {
 
 }
 
+// google_maps lo escribe el conductor y la RPC solo limita el largo.
+function mapsHref(latitud, longitud) {
+
+    const latitude = Number(latitud);
+    const longitude = Number(longitud);
+    const hasCoordinates = latitud != null &&
+        longitud != null &&
+        Number.isFinite(latitude) &&
+        Number.isFinite(longitude);
+
+    return hasCoordinates
+        ? `https://www.google.com/maps?q=${latitude},${longitude}`
+        : "";
+
+}
+
 function renderConductors(conductors) {
 
     if (!driversContainer) {
@@ -372,6 +388,10 @@ function openDriverProfile(driverId) {
             })
             : [];
 
+    const profileMapsHref = operation
+        ? mapsHref(operation.latitud, operation.longitud)
+        : "";
+
     profileDriverId.innerText =
         conductor.driver_id || "SIN DRIVER ID";
 
@@ -427,7 +447,7 @@ function openDriverProfile(driverId) {
                         return `<div class="profile-document-status">${escapeHTML(document.tipo_documento)} · ${escapeHTML(document.estado_revision)} · ${escapeHTML(document.nombre_archivo || document.storage_path)}</div>`;
                     }).join("")
                     : `<div class="profile-document-status">Sin documentos de equipo registrados.</div>`}
-                ${operation.google_maps ? `<a class="maps-button" href="${escapeHTML(operation.google_maps)}" target="_blank" rel="noopener noreferrer">VER EN GOOGLE MAPS</a>` : ""}
+                ${profileMapsHref ? `<a class="maps-button" href="${escapeHTML(profileMapsHref)}" target="_blank" rel="noopener noreferrer">VER EN GOOGLE MAPS</a>` : ""}
             ` : `<div class="profile-document-status">Sin operación actual asociada.</div>`}
         </section>
     `;
@@ -1055,49 +1075,24 @@ function createUnitCard(unit) {
             : "";
 
 
+    const mapsURL =
+        mapsHref(
+            unit.latitud,
+            unit.longitud
+        );
+
     let mapsButton = "";
 
 
-    if (unit.google_maps) {
+    if (mapsURL) {
 
         mapsButton = `
 
             <a
                 class="maps-button"
                 href="${escapeHTML(
-                    unit.google_maps
+                    mapsURL
                 )}"
-                target="_blank"
-                rel="noopener noreferrer">
-
-                VER EN GOOGLE MAPS
-
-            </a>
-
-        `;
-
-    }
-
-    else if (
-        unit.latitud !== null &&
-        unit.latitud !== undefined &&
-        unit.longitud !== null &&
-        unit.longitud !== undefined
-    ) {
-
-        const mapsURL =
-            `https://www.google.com/maps?q=${encodeURIComponent(
-                unit.latitud
-            )},${encodeURIComponent(
-                unit.longitud
-            )}`;
-
-
-        mapsButton = `
-
-            <a
-                class="maps-button"
-                href="${mapsURL}"
                 target="_blank"
                 rel="noopener noreferrer">
 
@@ -1623,10 +1618,6 @@ function buildUnits(
                     latestReport?.precision_gps ??
                     null,
 
-                google_maps:
-                    latestReport?.google_maps ??
-                    null,
-
                 observacion:
                     latestReport?.observacion ??
                     null,
@@ -1755,10 +1746,6 @@ function buildLegacyUnits(
 
                     precision_gps:
                         report.precision_gps ??
-                        null,
-
-                    google_maps:
-                        report.google_maps ??
                         null,
 
                     observacion:
@@ -1930,7 +1917,6 @@ async function loadReports() {
                 latitud,
                 longitud,
                 precision_gps,
-                google_maps,
                 observacion,
                 timestamp,
                 created_at
