@@ -14,6 +14,7 @@ No se escribió nada en producción ni en PREPROD.
 | `20261027192031` | `driver_invite_storage_upload.sql` | Un statement, md5 `650558fb87f486e0f941c47cd22bf000`, igual al archivo. |
 | `20261027210000` | `storage_policy_cleanup.sql` | Un statement, md5 `06580c40897b4325913645ddb9b727ef`, igual al archivo tras #8 (no la versión de #7). |
 | `20261028002755` | `onboarding_invite_binding.sql` | Alineada con prod (renombrada en #12). Un statement, md5 `2e270e8b3ceb8b29648128304a671d55`, igual al archivo. |
+| `20261031153000` | `platform_owner_confirmed_and_anon_execute.sql` | Ausente. No se consultó ni se aplicó en prod ni en PREPROD. Reversión: `down/20261031153000_platform_owner_confirmed_and_anon_execute.down.sql`. |
 
 ### Migraciones posteriores (#25, #26, #28)
 
@@ -83,14 +84,14 @@ select version, name, cardinality(statements)
  order by version;
 ```
 
-Deben salir exactamente las 6 versiones del repo. Las filas reparadas pueden tener 0 statements; eso es esperado. Después, `supabase db push --dry-run --linked` en cada proyecto no debe listar ninguna migración pendiente.
+Deben salir exactamente esas 6 versiones ya aplicadas, sin `20261031153000`. Las filas reparadas pueden tener 0 statements; eso es esperado. Ese archivo no se marca con `migration repair --status applied`: no está en el esquema. Lo aplica el fundador con `db push` cuando corresponda. Hasta entonces, `supabase db push --dry-run --linked` debe listar `20261031153000` junto con las demás versiones posteriores a `20261028002755` que no estén aplicadas.
 
 ## Por qué sigue `migrations/`
 
 El baseline salió de catálogos, no de un `pg_dump` ni de reaplicar esos archivos.
 
-- `migrations/2026-10-08-platform-organization-deletion.sql` define `public.delete_fleetops_platform_organization(uuid)`. En prod `pg_proc` devuelve 0 filas y el baseline no la tiene. `js/fleetops-admin.js` la llama. No la muevas a `supabase/migrations/` en este cambio: el próximo `db push` la crearía en prod.
-- `migrations/2026-10-08-platform-owner-dashboard.sql` inserta un email personal en `public.fleetops_platform_owners`. El baseline crea la tabla y no carga datos. Prod tiene 1 fila (`count(*)`; no se leyó el email).
+- `migrations/2026-10-08-platform-organization-deletion.sql` define `public.delete_fleetops_platform_organization(uuid)`. En prod `pg_proc` devuelve 0 filas y el baseline no la tiene. El panel ya no la llama. No la muevas a `supabase/migrations/`: el próximo `db push` la crearía en prod.
+- `migrations/2026-10-08-platform-owner-dashboard.sql` ya no inserta el email del owner. Ese INSERT sigue en el historial de git; no reaplicarlo. El baseline crea la tabla y no carga datos. Prod tiene 1 fila (`count(*)`; no se leyó el email).
 
 El resto de objetos creados por `migrations/` aparece en el baseline, pero los cuerpos no se compararon statement a statement. Por eso la carpeta se conserva y queda fuera de `db push`.
 
@@ -100,7 +101,7 @@ El resto de objetos creados por `migrations/` aparece en el baseline, pero los c
 
 ## Owner de plataforma
 
-La autorización es la tabla. `is_fleetops_platform_owner()` (baseline; ninguna migración posterior la reemplaza) devuelve verdadero si `auth.uid()` no es nulo y `lower(btrim(coalesce(auth.email(), '')))` está en `public.fleetops_platform_owners.email`. No une `auth.users` ni exige `email_confirmed_at`. El archivo histórico `migrations/2026-10-08-platform-owner-dashboard.sql` sí hacía ese join y pedía email confirmado; ese cuerpo no está en el baseline. En un entorno nuevo, insertar a mano o en un `supabase/seed.sql` no versionado:
+La autorización es la tabla. `20261031153000` reemplaza el cuerpo del baseline, que comparaba `auth.email()`, por el de `migrations/2026-10-08-platform-owner-dashboard.sql`: `auth.users` del `auth.uid()`, con `email_confirmed_at` no nulo. En un entorno nuevo, insertar a mano o en un `supabase/seed.sql` no versionado:
 
 ```sql
 insert into public.fleetops_platform_owners (email)
@@ -112,7 +113,11 @@ No reejecutar el INSERT histórico en prod.
 
 ## Funciones nuevas
 
-`20261027210000` ejecuta `alter default privileges for role postgres revoke execute on functions from public`. Aplica a toda función nueva que cree `postgres`, en cualquier schema y para todos los roles: ya no heredan `EXECUTE` de `PUBLIC`. En `public`, el default de Supabase sigue otorgando `EXECUTE` a `anon`, `authenticated` y `service_role`. Fuera de `public` hay que poner un `GRANT EXECUTE` explícito al rol que deba llamarla.
+`20261027210000` ejecuta `alter default privileges for role postgres revoke execute on functions from public`. Las funciones nuevas que cree `postgres` ya no heredan `EXECUTE` de `PUBLIC`, en cualquier schema.
+
+`20261031153000` ejecuta `alter default privileges for role postgres in schema public revoke execute on functions from anon`. `authenticated` y `service_role` siguen con ese default en `public`. Una función nueva de `public` no es ejecutable por `anon` salvo `GRANT EXECUTE` explícito. Fuera de `public` hace falta `GRANT EXECUTE` al rol que deba llamarla.
+
+Ese GRANT ya está en `20261027180547` para los RPC que el JS llama sin sesión: `resolve_viaje_public`, `submit_driver_report`, `resolve_organization_driver_invite`, `complete_organization_driver_onboarding`, `get_member_invite_context` y `get_customer_member_invite_context`. `CREATE OR REPLACE` posterior no lo quita.
 
 ## Checks
 

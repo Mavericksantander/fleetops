@@ -17,6 +17,7 @@ if not skip:
     files.append(root/'tests/tractos_insert_returning_test.sql')
     files.append(root/'tests/report_identity_tracto_invite_test.sql')
     files.append(root/'tests/tracto_org_two_tenants_test.sql')
+    files.append(root/'tests/platform_owner_confirmed_test.sql')
     files.append(root/'tests/org_active_scope_test.sql')
     files.append(root/'tests/customer_write_roles_test.sql')
     files.append(root/'tests/viajes_cross_org_binding_test.sql')

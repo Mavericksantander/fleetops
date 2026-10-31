@@ -298,7 +298,7 @@
 .admin-organization-columns,
 .admin-organization {
     display: grid;
-    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(145px, .65fr) auto;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(145px, .65fr);
     align-items: center;
     gap: 18px;
 }
@@ -373,26 +373,6 @@
     border-color: #c13b3b55;
     background: #c13b3b12;
     color: #e17a7a;
-}
-
-.admin-delete-button {
-    min-height: 32px;
-    padding: 0 10px;
-    border: 1px solid #c13b3b66;
-    background: #c13b3b12;
-    color: #e17a7a;
-    font: 8px "JetBrains Mono", monospace;
-    cursor: pointer;
-}
-
-.admin-delete-button:hover:not(:disabled) {
-    border-color: #e17a7a;
-    background: #c13b3b2b;
-}
-
-.admin-delete-button:disabled {
-    cursor: wait;
-    opacity: .65;
 }
 
 .admin-empty {
@@ -535,11 +515,6 @@
         grid-row: 1 / span 2;
         max-width: 120px;
         text-align: center;
-    }
-
-    .admin-delete-button {
-        grid-column: 2;
-        grid-row: 3;
     }
 
     .admin-invite {

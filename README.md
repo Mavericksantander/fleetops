@@ -72,8 +72,9 @@ Cada migración posterior a `20261028002755` tiene su reversión en
 El owner global es una fila de `public.fleetops_platform_owners`, no un email
 en el repositorio. Puede crear organizaciones y una invitación para el primer
 owner; la propiedad pasa al invitado cuando acepta. El enlace se comparte a
-mano. `delete_fleetops_platform_organization` no está en producción ni en el
-baseline: el panel la llama, pero no forma parte de este historial.
+mano. No hay botón para eliminar una organización:
+`delete_fleetops_platform_organization` no está en producción ni en el
+baseline, y el panel ya no la llama.
 
 ## Validacion rapida
 
