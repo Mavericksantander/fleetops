@@ -36,6 +36,8 @@ insert into public.tracto_documentos(tracto_id, tipo_documento, storage_path) va
 insert into public.viajes(id, patente, conductor, conductor_id, empresa, empresa_id, ruta) values
  ('fa000000-0000-0000-0000-000000000000','AAAA11','Conductor A','ca000000-0000-0000-0000-000000000000','Org A','0000000a-0000-0000-0000-000000000000','Ruta A'),
  ('fb000000-0000-0000-0000-000000000000','BBBB22','Conductor B','cb000000-0000-0000-0000-000000000000','Org B','0000000b-0000-0000-0000-000000000000','Ruta B');
+insert into public.customers(id, organization_id, name) values
+ ('c0000000-0000-0000-0000-00000000000a','0000000a-0000-0000-0000-000000000000','Cliente A');
 insert into public.reportes(conductor, conductor_id, patente, empresa, ruta, estado, latitud, longitud, viaje_id) values
  ('Conductor A','ca000000-0000-0000-0000-000000000000','AAAA11','Org A','Ruta A','En ruta',-23.6,-70.4,'fa000000-0000-0000-0000-000000000000'),
  ('Conductor B','cb000000-0000-0000-0000-000000000000','BBBB22','Org B','Ruta B','En ruta',-24.1,-70.2,'fb000000-0000-0000-0000-000000000000');
@@ -60,7 +62,9 @@ do $$ begin
   assert pg_temp.denied('select 1 from public.tractos limit 1'),     'anon puede leer tractos';
   assert pg_temp.denied('select public.create_member_invite(''x@example.test'',''admin'')'), 'anon ejecuta create_member_invite';
   assert pg_temp.denied('select public.list_fleetops_platform_organizations()'), 'anon ejecuta list_fleetops_platform_organizations';
-  assert pg_temp.denied('select public.finalizar_viaje(''AAAA11''::text)'), 'anon ejecuta finalizar_viaje(text)';
+  assert to_regprocedure('public.finalizar_viaje(text)') is null
+         or pg_temp.denied('select public.finalizar_viaje(''AAAA11''::text)'),
+         'anon ejecuta finalizar_viaje(text)';
   assert pg_temp.denied('select public.user_has_org_role(null, array[''owner''])'), 'anon ejecuta user_has_org_role';
   raise notice 'ANON: OK — sin lectura de conductores/reportes/tractos, sin insert directo, sin RPC internas';
 end $$;
@@ -135,6 +139,10 @@ do $$ declare n int; begin
   values ('Torre A','AAAA11','Org A','Ruta A','En ruta','fa000000-0000-0000-0000-000000000000');
   update public.conductores set ciudad = 'Antofagasta' where id = 'ca000000-0000-0000-0000-000000000000';
   get diagnostics n = row_count; assert n = 1, 'org A no puede editar su conductor';
+  select count(*) into n from public.viajes where id = 'fb000000-0000-0000-0000-000000000000';
+  assert n = 0, 'org A ve viaje de org B';
+  select count(*) into n from public.organizations where id = '0000000b-0000-0000-0000-000000000000';
+  assert n = 0, 'org A ve la organización B';
   raise notice 'ORG A (owner): OK — ve solo lo suyo, no lee ni escribe datos de org B';
 end $$;
 
@@ -162,6 +170,8 @@ do $$ declare n int; begin
   select count(*) into n from public.tracto_documentos;     assert n = 1, 'org B: tracto_documentos <> 1';
   select count(*) into n from public.reportes where viaje_id = 'fa000000-0000-0000-0000-000000000000';
   assert n = 0, 'org B ve reportes de org A';
+  select count(*) into n from public.viajes where id = 'fa000000-0000-0000-0000-000000000000';
+  assert n = 0, 'org B ve viaje de org A';
   raise notice 'ORG B (owner): OK — no ve datos de org A';
 end $$;
 
@@ -172,7 +182,12 @@ do $$ declare n int; begin
        + (select count(*) from public.tractos) + (select count(*) from public.conductor_documentos)
        + (select count(*) from public.tracto_documentos) into n;
   assert n = 0, format('usuario sin organización ve %s filas', n);
-  raise notice 'SIN ORG: OK — 0 filas en conductores/reportes/tractos/documentos';
+  select (select count(*) from public.viajes) + (select count(*) from public.organizations)
+       + (select count(*) from public.organization_members) + (select count(*) from public.customers) into n;
+  assert n = 0, format('usuario sin organización ve %s filas en viajes/organizations/members/customers', n);
+  update public.viajes set ruta = 'X';
+  get diagnostics n = row_count; assert n = 0, 'usuario sin organización modificó viajes';
+  raise notice 'SIN ORG: OK — 0 filas en conductores/reportes/tractos/documentos/viajes/organizations/customers';
 end $$;
 
 reset role;
