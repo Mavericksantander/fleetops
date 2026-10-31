@@ -62,7 +62,9 @@ do $$ begin
   assert pg_temp.denied('select 1 from public.tractos limit 1'),     'anon puede leer tractos';
   assert pg_temp.denied('select public.create_member_invite(''x@example.test'',''admin'')'), 'anon ejecuta create_member_invite';
   assert pg_temp.denied('select public.list_fleetops_platform_organizations()'), 'anon ejecuta list_fleetops_platform_organizations';
-  assert pg_temp.denied('select public.finalizar_viaje(''AAAA11''::text)'), 'anon ejecuta finalizar_viaje(text)';
+  assert to_regprocedure('public.finalizar_viaje(text)') is null
+         or pg_temp.denied('select public.finalizar_viaje(''AAAA11''::text)'),
+         'anon ejecuta finalizar_viaje(text)';
   assert pg_temp.denied('select public.user_has_org_role(null, array[''owner''])'), 'anon ejecuta user_has_org_role';
   raise notice 'ANON: OK — sin lectura de conductores/reportes/tractos, sin insert directo, sin RPC internas';
 end $$;
