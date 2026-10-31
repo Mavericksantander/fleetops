@@ -1,4 +1,4 @@
--- Reversión de 20261028013209_org_insert_and_active_org.sql.
+-- Reversión de 20261031152000_org_insert_and_active_org.sql.
 -- Restaura exactamente el estado de main: políticas de organizations
 -- (users_create_organizations INSERT y org_owner_manage_organizations FOR ALL),
 -- create_customer(text,text,text,text) y create_member_invite(text,text)
