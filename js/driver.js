@@ -663,19 +663,6 @@ function showSuccess(
     existed
 ) {
 
-    try {
-        localStorage.setItem(
-            "fleetops.driver_name",
-            nombre
-        );
-    }
-    catch (storageError) {
-        console.warn(
-            "DRIVER: no fue posible guardar la identidad local",
-            storageError
-        );
-    }
-
     driverForm.style.display = "none";
 
     successScreen.style.display = "block";
