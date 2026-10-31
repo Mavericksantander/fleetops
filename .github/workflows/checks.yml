@@ -22,3 +22,5 @@ jobs:
           for f in js/*.js scripts/*.mjs; do
             node --check "$f"
           done
+      - name: escapeCSV
+        run: npm test
