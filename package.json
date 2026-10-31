@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build-config.mjs",
-    "test": "node --test tests/frontend/"
+    "test": "node --test 'tests/frontend/*.test.mjs'"
   },
   "engines": {
     "node": ">=18"

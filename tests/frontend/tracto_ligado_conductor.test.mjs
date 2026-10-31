@@ -23,7 +23,7 @@ const ORG_B = "0000000b-0000-0000-0000-000000000000";
 // --- FINALIZADOS (js/conductores.js): funciones reales en un vm ---
 function loadCompletedSandbox({ activeOrganizationId, conductors, trips }) {
   const src = fs.readFileSync("js/conductores.js", "utf8");
-  const code = ["getOrganizationConductorsById", "getCompletedTripsForActiveOrganization",
+  const code = ["selectLinkedConductors", "getOrganizationConductorsById", "getCompletedTripsForActiveOrganization",
     "renderCompletedPools", "returnCompletedTripToAvailable"].map((n) => extract(src, n)).join("\n");
   const sb = {
     completedPool: { innerHTML: "" }, escapeHTML, activeOrganizationId,
@@ -102,6 +102,44 @@ test("aislamiento: org A no ve conductores/tractos/viajes de org B ni vía el bo
   for (const x of ["TRAA11", "TRAA22", "t-a1", "t-a2", "Conductor Ficticio A"]) assert.ok(!sbB.completedPool.innerHTML.includes(x), `org B ve ${x}`);
   sbB.tid = "t-a2";
   assert.equal(vm.runInContext("returnCompletedTripToAvailable(tid)", sbB), false);
+});
+
+test("FINALIZADOS: la patente sale de trip.patente; si falta, del tracto actual del conductor", () => {
+  const conductors = [
+    { id: "c-a1", driver_id: "FO-A1", nombre: "Conductor Ficticio A1", tracto: { patente: "TRNUEVO1" } },
+    { id: "c-a2", driver_id: "FO-A2", nombre: "Conductor Ficticio A2", tracto: { patente: "TRACT22" } },
+  ];
+  const trips = [
+    { id: "t-p1", conductor_id: "c-a1", patente: "TRVIEJO1", empresa_id: ORG_A, ruta: "Ruta A", fecha_finalizacion: "2026-10-30T10:00:00Z" },
+    { id: "t-p2", conductor_id: "c-a2", patente: null, empresa_id: ORG_A, ruta: "Ruta A", fecha_finalizacion: "2026-10-30T10:00:00Z" },
+  ];
+  const sb = loadCompletedSandbox({ activeOrganizationId: ORG_A, conductors, trips });
+  vm.runInContext("renderCompletedPools(currentTrips)", sb);
+  const rows = sb.completedPool.innerHTML.split("<article").slice(1);
+  const r1 = rows.find((r) => r.includes('data-trip-id="t-p1"'));
+  const r2 = rows.find((r) => r.includes('data-trip-id="t-p2"'));
+  assert.ok(r1.includes("TRVIEJO1") && !r1.includes("TRNUEVO1"), "no usa el tracto del viaje");
+  assert.ok(r2.includes("TRACT22"), "no cae al tracto actual del conductor");
+});
+
+test("vínculos: solo ACTIVE cuentan; rechazado (fila borrada o status distinto) y PENDING no generan filas", () => {
+  const src = fs.readFileSync("js/conductores.js", "utf8");
+  const sb = { activeOrganizationId: ORG_A, out: null, rel: [
+    { organization_id: ORG_A, status: "ACTIVE", conductor: { id: "c-a1", driver_id: "FO-A1", nombre: "Conductor Ficticio A1" } },
+    { organization_id: ORG_A, status: "PENDING", conductor: { id: "c-a2", driver_id: "FO-A2", nombre: "Conductor Ficticio A2" } },
+    { organization_id: ORG_A, status: "REJECTED", conductor: { id: "c-a3", driver_id: "FO-A3", nombre: "Conductor Ficticio A3" } },
+    { organization_id: ORG_B, status: "ACTIVE", conductor: { id: "c-b1", driver_id: "FO-B1", nombre: "Conductor Ficticio B1" } },
+  ] };
+  vm.createContext(sb);
+  vm.runInContext(extract(src, "selectLinkedConductors") + "; out = JSON.stringify(selectLinkedConductors(rel, 'ACTIVE').map(c => c.id));", sb);
+  assert.equal(sb.out, JSON.stringify(["c-a1"]));
+  // reject_organization_driver borra el vínculo: c-a4 tiene viaje pero ya no está en la lista
+  const trips = ["c-a1", "c-a2", "c-a3", "c-a4"].map((c, i) => ({ id: `t-r${i}`, conductor_id: c, patente: `TRR${i}`, empresa_id: ORG_A, ruta: "Ruta A", fecha_finalizacion: "2026-10-30T10:00:00Z" }));
+  const sb2 = loadCompletedSandbox({ activeOrganizationId: ORG_A, conductors: [sb.rel[0].conductor], trips });
+  vm.runInContext("renderCompletedPools(currentTrips)", sb2);
+  const html = sb2.completedPool.innerHTML;
+  assert.ok(html.includes('data-trip-id="t-r0"'));
+  for (const id of ["t-r1", "t-r2", "t-r3"]) assert.ok(!html.includes(`data-trip-id="${id}"`), `${id} genera fila`);
 });
 
 test("dashboard: un viaje abierto sin conductor (desasignado) no genera tarjeta solo-tracto", () => {

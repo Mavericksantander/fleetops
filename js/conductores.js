@@ -53,6 +53,7 @@ const closeDriverProfileButton =
     document.getElementById("closeDriverProfile");
 
 let currentConductors = [];
+let currentPendingConductors = [];
 let currentTrips = [];
 let currentRoutes = [];
 let currentConductorDocuments = [];
@@ -194,6 +195,18 @@ function renderEmpty(title, text) {
     `;
 }
 
+function selectLinkedConductors(relationships, status) {
+    return (relationships || [])
+        .filter(function (relationship) {
+            return relationship.status === status &&
+                relationship.organization_id === activeOrganizationId &&
+                relationship.conductor;
+        })
+        .map(function (relationship) {
+            return relationship.conductor;
+        });
+}
+
 function getOrganizationConductorsById() {
     // Solo conductores vinculados a la organización activa (organization_drivers
     // ya viene filtrado por activeOrganizationId en loadDriverPool).
@@ -258,10 +271,11 @@ function renderCompletedPools(trips) {
                 </div>
                 <div class="route-driver-list">
                     ${entries.map(function ({ trip, conductor }) {
+                        // Primero el tracto que hizo el viaje; si no existe, el actual del conductor.
                         const tractoPatente =
+                            trip.patente ||
                             conductor.tracto?.patente ||
                             conductor.patente_habitual ||
-                            trip.patente ||
                             "SIN PATENTE";
                         return `
                             <article class="route-driver" data-trip-id="${escapeHTML(trip.id)}">
@@ -329,7 +343,7 @@ async function getDocumentSignedUrl(storagePath) {
 async function openDriverProfile(driverId) {
 
     const cachedConductor =
-        currentConductors.find(function (item) {
+        currentConductors.concat(currentPendingConductors).find(function (item) {
             return item.id === driverId;
         });
 
@@ -765,13 +779,10 @@ function renderPools(relationships, trips, routes) {
         operationalGroups[routeName].push(driver);
     });
 
-    currentConductors = relationships
-        .filter(function (relationship) {
-            return relationship.conductor;
-        })
-        .map(function (relationship) {
-            return relationship.conductor;
-        });
+    // Solo vínculos aprobados/activos (status ACTIVE) cuentan como conductores
+    // de la organización. Los PENDING se guardan aparte (solo para VER PERFIL).
+    currentConductors = selectLinkedConductors(relationships, "ACTIVE");
+    currentPendingConductors = selectLinkedConductors(relationships, "PENDING");
     currentTrips = trips;
     currentRoutes = routes;
     poolCount.innerText = conductors.length;
