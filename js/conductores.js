@@ -194,24 +194,119 @@ function renderEmpty(title, text) {
     `;
 }
 
+function getOrganizationConductorsById() {
+    // Solo conductores vinculados a la organización activa (organization_drivers
+    // ya viene filtrado por activeOrganizationId en loadDriverPool).
+    const index = {};
+    (currentConductors || []).forEach(function (conductor) {
+        if (conductor && conductor.id) {
+            index[conductor.id] = conductor;
+        }
+    });
+    return index;
+}
+
+function getCompletedTripsForActiveOrganization(trips) {
+    const conductorsById = getOrganizationConductorsById();
+
+    // El tracto va ligado al conductor: un viaje sin conductor (o con un
+    // conductor que no pertenece a la org activa) no genera fila.
+    return trips
+        .filter(function (trip) {
+            return Boolean(trip.fecha_finalizacion) &&
+                trip.empresa_id === activeOrganizationId &&
+                Boolean(trip.conductor_id) &&
+                Boolean(conductorsById[trip.conductor_id]) &&
+                !returnedCompletedTripIds.has(trip.id);
+        })
+        .map(function (trip) {
+            return { trip, conductor: conductorsById[trip.conductor_id] };
+        });
+}
+
 function renderCompletedPools(trips) {
 
-    // El tracto va ligado al conductor (conductores.tracto_id) y nunca se
-    // muestra por separado. Al finalizar o retirar de ruta, el conductor
-    // vuelve a DISPONIBLES junto con su tracto; aquí no se pinta ninguna
-    // fila por viaje finalizado (antes quedaba una fila suelta con la patente).
-    const finishedCount = trips.filter(function (trip) {
-        return Boolean(trip.fecha_finalizacion) &&
-            trip.empresa_id === activeOrganizationId;
-    }).length;
+    const completedByRoute = {};
 
-    completedPool.innerHTML = `
-        <div class="empty-state">
-            <div class="empty-title">${finishedCount} VIAJE${finishedCount === 1 ? "" : "S"} FINALIZADO${finishedCount === 1 ? "" : "S"}</div>
-            <div class="empty-text">Al finalizar o retirar de ruta, el conductor vuelve a DISPONIBLES con su tracto.</div>
-        </div>
-    `;
+    getCompletedTripsForActiveOrganization(trips)
+        .forEach(function (entry) {
+            const routeName = entry.trip.ruta || "SIN RUTA ASOCIADA";
 
+            if (!completedByRoute[routeName]) {
+                completedByRoute[routeName] = [];
+            }
+
+            completedByRoute[routeName].push(entry);
+        });
+
+    if (Object.keys(completedByRoute).length === 0) {
+        completedPool.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-title">SIN VIAJES FINALIZADOS</div>
+                <div class="empty-text">Los conductores aparecerán aquí al finalizar una operación.</div>
+            </div>
+        `;
+        return;
+    }
+
+    completedPool.innerHTML = Object.entries(completedByRoute).map(function ([routeName, entries]) {
+        return `
+            <section class="route-group completed-route-group">
+                <div class="route-group-header">
+                    <div class="route-name">${escapeHTML(routeName)}</div>
+                    <div class="route-count">${entries.length} FINALIZADO${entries.length === 1 ? "" : "S"}</div>
+                </div>
+                <div class="route-driver-list">
+                    ${entries.map(function ({ trip, conductor }) {
+                        const tractoPatente =
+                            conductor.tracto?.patente ||
+                            conductor.patente_habitual ||
+                            trip.patente ||
+                            "SIN PATENTE";
+                        return `
+                            <article class="route-driver" data-trip-id="${escapeHTML(trip.id)}">
+                                <div class="route-driver-top">
+                                    <div>
+                                        <div class="route-driver-id">${escapeHTML(conductor.driver_id || "")}</div>
+                                        <div class="route-driver-name">${escapeHTML(conductor.nombre || trip.conductor || "")}</div>
+                                    </div>
+                                    <div>
+                                        <div class="route-driver-plate">
+                                            <span class="route-driver-plate-label">EQUIPO / PATENTE</span>
+                                            ${escapeHTML(tractoPatente)}
+                                        </div>
+                                        <div class="route-driver-state">FINALIZADO</div>
+                                    </div>
+                                </div>
+                                <div class="route-driver-meta">VIAJE ${escapeHTML(trip.id)} · ${escapeHTML(trip.empresa || "SIN EMPRESA")}</div>
+                                <button type="button" class="assignment-button reassign-button" data-conductor-id="${escapeHTML(conductor.id)}">REASIGNAR</button>
+                                ${routeName === "SIN RUTA ASOCIADA" ? `<button type="button" class="assignment-button return-available-button" data-trip-id="${escapeHTML(trip.id)}">DEVOLVER A DISPONIBLES</button>` : ""}
+                            </article>
+                        `;
+                    }).join("")}
+                </div>
+            </section>
+        `;
+    }).join("");
+
+}
+
+function returnCompletedTripToAvailable(tripId) {
+    // Solo acepta un viaje finalizado de la org activa con conductor vinculado;
+    // un id de otra organización (p. ej. un data-trip-id manipulado) se ignora.
+    const allowed = getCompletedTripsForActiveOrganization(currentTrips || [])
+        .some(function (entry) {
+            return entry.trip.id === tripId;
+        });
+
+    if (!allowed) {
+        return false;
+    }
+
+    returnedCompletedTripIds.add(tripId);
+    saveReturnedCompletedTripIds();
+    renderCompletedPools(currentTrips);
+    return true;
 }
 
 async function getDocumentSignedUrl(storagePath) {
@@ -963,10 +1058,7 @@ document.addEventListener("click", function (event) {
         event.target.closest(".return-available-button");
 
     if (returnAvailableButton) {
-        const tripId = returnAvailableButton.dataset.tripId;
-        returnedCompletedTripIds.add(tripId);
-        saveReturnedCompletedTripIds();
-        renderCompletedPools(currentTrips);
+        returnCompletedTripToAvailable(returnAvailableButton.dataset.tripId);
         return;
     }
 
