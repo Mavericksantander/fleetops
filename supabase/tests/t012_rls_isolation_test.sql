@@ -60,7 +60,7 @@ do $$ begin
   assert pg_temp.denied($q$insert into public.reportes(conductor,patente,empresa,ruta,estado) values ('x','X','x','x','En ruta')$q$),
          'anon puede insertar reportes directo';
   assert pg_temp.denied('select 1 from public.tractos limit 1'),     'anon puede leer tractos';
-  assert pg_temp.denied('select public.create_member_invite(''x@example.test'',''admin'')'), 'anon ejecuta create_member_invite';
+  assert pg_temp.denied('select public.create_member_invite(''00000000-0000-0000-0000-000000000000''::uuid,''x@example.test'',''admin'')'), 'anon ejecuta create_member_invite';
   assert pg_temp.denied('select public.list_fleetops_platform_organizations()'), 'anon ejecuta list_fleetops_platform_organizations';
   assert to_regprocedure('public.finalizar_viaje(text)') is null
          or pg_temp.denied('select public.finalizar_viaje(''AAAA11''::text)'),
