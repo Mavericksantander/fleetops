@@ -282,8 +282,7 @@ async function initializeTeam() {
         window.location.replace("customer-dashboard.html");
         return;
     }
-    const canManage = role === "owner" || role === "admin" ||
-        context.activeOrganization.owner_id === context.session.user.id;
+    const canManage = role === "owner" || role === "admin";
     canManageCustomers = canManage;
     inviteButton.hidden = !canManage;
     createCustomerForm.hidden = !canManage;
@@ -435,6 +434,7 @@ inviteForm.addEventListener("submit", async function (event) {
         : "create_customer_member_invite";
     const rpcArgs = inviteCustomerField.hidden
         ? {
+            p_organization_id: activeOrganizationId,
             p_email: inviteEmail.value.trim(),
             p_role: inviteRole.value
         }

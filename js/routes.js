@@ -4,6 +4,7 @@ const routeForm = document.getElementById("routeForm");
 const routeError = document.getElementById("routeError");
 let activeOrganizationId = null;
 let activeOrganization = null;
+let canCreateRoutes = false;
 
 function escapeHTML(value){return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
 
@@ -25,6 +26,12 @@ async function requireOperator(){
     if(membership?.role==="customer"){
         window.location.replace("customer-dashboard.html");
         return false;
+    }
+    // routes_manage_by_admin_owner admite solo owner y admin.
+    canCreateRoutes = membership?.role === "owner" || membership?.role === "admin";
+    const routePanel = document.getElementById("routePanel");
+    if (routePanel) {
+        routePanel.hidden = !canCreateRoutes;
     }
     return true;
 }
@@ -54,6 +61,9 @@ async function loadRouteData(){
 
 routeForm.addEventListener("submit",async function(event){
     event.preventDefault();
+    if (!canCreateRoutes) {
+        return;
+    }
     routeError.innerText="";
     const organization_id=activeOrganizationId;
     const payload={

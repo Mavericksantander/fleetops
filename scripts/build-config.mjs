@@ -11,6 +11,29 @@ const out = join(root, "dist");
 
 const url = (process.env.SUPABASE_URL || "").trim();
 const anonKey = (process.env.SUPABASE_ANON_KEY || "").trim();
+
+// sb_secret_ no contiene el texto "service_role". En un JWT, ese rol va en el
+// payload base64, así que tampoco aparece en la clave en claro.
+function jwtPayloadRole(key) {
+  const parts = key.split(".");
+  if (parts.length !== 3 || parts.some((part) => part.length === 0)) return "";
+  for (const encoding of ["base64url", "base64"]) {
+    try {
+      const payload = JSON.parse(Buffer.from(parts[1], encoding).toString("utf8"));
+      if (payload && typeof payload.role === "string") return payload.role.trim();
+    } catch {
+      // el segmento no es JSON en esta codificación
+    }
+  }
+  return "";
+}
+
+function isPrivilegedSupabaseKey(key) {
+  if (/^sb_secret_/i.test(key)) return true;
+  if (/service[_-]?role/i.test(key)) return true;
+  return /service[_-]?role/i.test(jwtPayloadRole(key));
+}
+
 const missing = [];
 if (!url) missing.push("SUPABASE_URL");
 if (!anonKey) missing.push("SUPABASE_ANON_KEY");
@@ -23,8 +46,8 @@ if (!/^https:\/\/[^\s/]+/.test(url)) {
   console.error(`[build-config] ERROR: SUPABASE_URL debe empezar con https:// (recibido: "${url}").`);
   process.exit(1);
 }
-if (/service[_-]?role/i.test(anonKey)) {
-  console.error("[build-config] ERROR: SUPABASE_ANON_KEY parece una service_role key. Usa la anon/publishable key.");
+if (isPrivilegedSupabaseKey(anonKey)) {
+  console.error("[build-config] ERROR: SUPABASE_ANON_KEY parece una clave privilegiada (service_role o sb_secret_). Usa la anon/publishable key.");
   process.exit(1);
 }
 

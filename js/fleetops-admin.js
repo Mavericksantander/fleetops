@@ -59,51 +59,9 @@ function renderOrganizations(organizations) {
                     <div class="admin-organization-meta">Primer owner</div>
                 </div>
                 <div class="admin-organization-status ${statusClass}">${escapeHTML(organization.invite_status)}</div>
-                <button
-                    class="admin-delete-button"
-                    type="button"
-                    data-organization-id="${escapeHTML(organization.organization_id)}"
-                    data-organization-name="${escapeHTML(organization.organization_name)}"
-                >ELIMINAR</button>
             </article>
         `;
     }).join("");
-}
-
-async function deleteOrganization(button) {
-    const organizationId = button.dataset.organizationId;
-    const organizationName = button.dataset.organizationName;
-    if (!organizationId || !organizationName) {
-        adminError.innerText = "No fue posible identificar la organización seleccionada.";
-        return;
-    }
-
-    const confirmed = window.confirm(
-        `¿Eliminar permanentemente “${organizationName}” y todos sus datos operativos, clientes, accesos e invitaciones? Esta acción no se puede deshacer.`
-    );
-    if (!confirmed) {
-        return;
-    }
-
-    adminError.innerText = "";
-    button.disabled = true;
-    button.innerText = "ELIMINANDO...";
-
-    try {
-        const { error } = await supabaseClient.rpc(
-            "delete_fleetops_platform_organization",
-            { p_organization_id: organizationId }
-        );
-        if (error) {
-            throw error;
-        }
-        await loadOrganizations();
-    } catch (error) {
-        console.error("PRÆTOR FleetOps: no fue posible eliminar la organización", error);
-        adminError.innerText = error.message || "No fue posible eliminar la organización.";
-        button.disabled = false;
-        button.innerText = "ELIMINAR";
-    }
 }
 
 async function loadOrganizations() {
@@ -113,13 +71,6 @@ async function loadOrganizations() {
     }
     renderOrganizations(data || []);
 }
-
-organizationList.addEventListener("click", function (event) {
-    const button = event.target.closest(".admin-delete-button");
-    if (button) {
-        deleteOrganization(button);
-    }
-});
 
 async function initializePlatformDashboard() {
     const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
