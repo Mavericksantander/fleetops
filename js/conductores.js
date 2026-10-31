@@ -196,62 +196,21 @@ function renderEmpty(title, text) {
 
 function renderCompletedPools(trips) {
 
-    const completedByRoute = {};
+    // El tracto va ligado al conductor (conductores.tracto_id) y nunca se
+    // muestra por separado. Al finalizar o retirar de ruta, el conductor
+    // vuelve a DISPONIBLES junto con su tracto; aquí no se pinta ninguna
+    // fila por viaje finalizado (antes quedaba una fila suelta con la patente).
+    const finishedCount = trips.filter(function (trip) {
+        return Boolean(trip.fecha_finalizacion) &&
+            trip.empresa_id === activeOrganizationId;
+    }).length;
 
-    trips
-        .filter(function (trip) {
-            return Boolean(trip.fecha_finalizacion) &&
-                trip.empresa_id === activeOrganizationId &&
-                !returnedCompletedTripIds.has(trip.id);
-        })
-        .forEach(function (trip) {
-            const routeName = trip.ruta || "SIN RUTA ASOCIADA";
-
-            if (!completedByRoute[routeName]) {
-                completedByRoute[routeName] = [];
-            }
-
-            completedByRoute[routeName].push(trip);
-        });
-
-    if (Object.keys(completedByRoute).length === 0) {
-        completedPool.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-title">SIN VIAJES FINALIZADOS</div>
-                <div class="empty-text">Los conductores aparecerán aquí al finalizar una operación.</div>
-            </div>
-        `;
-        return;
-    }
-
-    completedPool.innerHTML = Object.entries(completedByRoute).map(function ([routeName, tripsForRoute]) {
-        return `
-            <section class="route-group completed-route-group">
-                <div class="route-group-header">
-                    <div class="route-name">${escapeHTML(routeName)}</div>
-                    <div class="route-count">${tripsForRoute.length} FINALIZADO${tripsForRoute.length === 1 ? "" : "S"}</div>
-                </div>
-                <div class="route-driver-list">
-                    ${tripsForRoute.map(function (trip) {
-                        return `
-                            <article class="route-driver">
-                                <div class="route-driver-top">
-                                    <div>
-                                        <div class="route-driver-id">${escapeHTML(trip.conductor || "SIN CONDUCTOR")}</div>
-                                        <div class="route-driver-name">${escapeHTML(trip.patente || "SIN PATENTE")}</div>
-                                    </div>
-                                    <div class="route-driver-state">FINALIZADO</div>
-                                </div>
-                                <div class="route-driver-meta">VIAJE ${escapeHTML(trip.id)} · ${escapeHTML(trip.empresa || "SIN EMPRESA")}</div>
-                                <button type="button" class="assignment-button reassign-button" data-conductor-id="${escapeHTML(trip.conductor_id || "")}">REASIGNAR</button>
-                                ${routeName === "SIN RUTA ASOCIADA" ? `<button type="button" class="assignment-button return-available-button" data-trip-id="${escapeHTML(trip.id)}">DEVOLVER A DISPONIBLES</button>` : ""}
-                            </article>
-                        `;
-                    }).join("")}
-                </div>
-            </section>
-        `;
-    }).join("");
+    completedPool.innerHTML = `
+        <div class="empty-state">
+            <div class="empty-title">${finishedCount} VIAJE${finishedCount === 1 ? "" : "S"} FINALIZADO${finishedCount === 1 ? "" : "S"}</div>
+            <div class="empty-text">Al finalizar o retirar de ruta, el conductor vuelve a DISPONIBLES con su tracto.</div>
+        </div>
+    `;
 
 }
 

@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node scripts/build-config.mjs"
+    "build": "node scripts/build-config.mjs",
+    "test": "node --test tests/frontend/"
   },
   "engines": {
     "node": ">=18"
