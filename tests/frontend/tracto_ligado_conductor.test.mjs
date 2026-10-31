@@ -21,12 +21,12 @@ const escapeHTML = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => `&#${c.char
 const ORG_A = "0000000a-0000-0000-0000-000000000000";
 const ORG_B = "0000000b-0000-0000-0000-000000000000";
 // --- FINALIZADOS (js/conductores.js): funciones reales en un vm ---
-function loadCompletedSandbox({ activeOrganizationId, conductors, trips }) {
+function loadCompletedSandbox({ activeOrganizationId, conductors, trips, canAssignOperations = true }) {
   const src = fs.readFileSync("js/conductores.js", "utf8");
   const code = ["selectLinkedConductors", "getOrganizationConductorsById", "getCompletedTripsForActiveOrganization",
     "renderCompletedPools", "returnCompletedTripToAvailable"].map((n) => extract(src, n)).join("\n");
   const sb = {
-    completedPool: { innerHTML: "" }, escapeHTML, activeOrganizationId,
+    completedPool: { innerHTML: "" }, escapeHTML, activeOrganizationId, canAssignOperations,
     currentConductors: conductors, currentTrips: trips,
     returnedCompletedTripIds: new Set(), saved: 0,
     saveReturnedCompletedTripIds() { sb.saved++; },
@@ -142,6 +142,13 @@ test("vínculos: solo ACTIVE cuentan; rechazado (fila borrada o status distinto)
   for (const id of ["t-r1", "t-r2", "t-r3"]) assert.ok(!html.includes(`data-trip-id="${id}"`), `${id} genera fila`);
 });
 
+test("FINALIZADOS: sin permiso de asignar (#18) no aparece REASIGNAR", () => {
+  const sb = loadCompletedSandbox({ activeOrganizationId: ORG_A, conductors: CONDUCTORES_A, trips: TRIPS, canAssignOperations: false });
+  vm.runInContext("renderCompletedPools(currentTrips)", sb);
+  assert.equal(sb.completedPool.innerHTML.split("<article").length - 1, 2);
+  assert.ok(!sb.completedPool.innerHTML.includes("reassign-button"));
+});
+
 test("dashboard: un viaje abierto sin conductor (desasignado) no genera tarjeta solo-tracto", () => {
   const src = fs.readFileSync("js/dashboard.js", "utf8");
   const sandbox = {
@@ -159,16 +166,8 @@ test("dashboard: un viaje abierto sin conductor (desasignado) no genera tarjeta 
   assert.ok(sandbox.out.every((u) => u.conductor_id), "unidad sin conductor");
 });
 
-test("dashboard legacy: un reporte sin conductor no genera tarjeta solo-tracto", () => {
+test("dashboard legacy: sin fallback legacy (#18), ningún reporte suelto genera tarjeta solo-tracto", () => {
   const src = fs.readFileSync("js/dashboard.js", "utf8");
-  const sandbox = {
-    normalizePlate: (v) => String(v || "").replace(/[^a-zA-Z0-9]/g, "").toUpperCase(),
-    out: null,
-    reports: [
-      { viaje_id: null, patente: "TRAA44", conductor_id: null, conductor: null, estado: "En ruta", timestamp: "2026-10-30T09:00:00Z" },
-      { viaje_id: null, patente: "TRAA55", conductor_id: null, conductor: "Conductor Ficticio Legacy", estado: "En ruta", timestamp: "2026-10-30T09:00:00Z" },
-    ],
-  };
-  vm.runInNewContext(extract(src, "buildLegacyUnits") + "; out = buildLegacyUnits(reports, {});", sandbox);
-  assert.equal(JSON.stringify(sandbox.out.map((u) => u.patente)), JSON.stringify(["TRAA55"]));
+  // #18 eliminó buildLegacyUnits: las unidades salen solo de viajes (buildUnits, con conductor).
+  assert.ok(!src.includes("buildLegacyUnits"), "volvió el fallback legacy");
 });

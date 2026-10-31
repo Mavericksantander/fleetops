@@ -734,24 +734,6 @@ function showSuccess(
     const operationLink =
         document.getElementById("operationBtn");
 
-    try {
-        localStorage.setItem(
-            "fleetops.driver_id",
-            driverId
-        );
-
-        localStorage.setItem(
-            "fleetops.driver_name",
-            nombre
-        );
-    }
-    catch (storageError) {
-        console.warn(
-            "DRIVER: no fue posible guardar la identidad local",
-            storageError
-        );
-    }
-
     if (operationLink) {
         const viaje =
             new URLSearchParams(window.location.search).get("viaje")?.trim() || "";
@@ -760,11 +742,9 @@ function showSuccess(
             operationLink.hidden = true;
             operationLink.removeAttribute("href");
         } else {
-            const params = new URLSearchParams();
-            params.set("viaje", viaje);
-            params.set("driver_id", driverId);
             operationLink.hidden = false;
-            operationLink.href = `reportes.html?${params.toString()}`;
+            operationLink.href =
+                "reportes.html?viaje=" + encodeURIComponent(viaje);
         }
     }
 

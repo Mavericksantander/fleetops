@@ -15,21 +15,6 @@ const connectionIndicator =
 const connectionText =
     document.getElementById("connectionText");
 
-const driversContainer =
-    document.getElementById("driversContainer");
-
-const driverCount =
-    document.getElementById("driverCount");
-
-const driverProfileModal =
-    document.getElementById("driverProfileModal");
-
-const driverProfileContent =
-    document.getElementById("driverProfileContent");
-
-const profileDriverId =
-    document.getElementById("profileDriverId");
-
 let activeOrganizationId = null;
 let dashboardAccessValid = false;
 let dashboardPollingId = null;
@@ -105,45 +90,6 @@ async function initializeOperatorSession() {
 
 }
 
-document
-    .querySelectorAll(".nav-button[data-view]")
-    .forEach(
-        button => {
-
-            if (button.disabled) {
-                return;
-            }
-
-            button.addEventListener(
-                "click",
-                function () {
-
-                    document
-                        .querySelectorAll(".nav-button[data-view]")
-                        .forEach(
-                            navButton => {
-                                navButton.classList.remove("active");
-                            }
-                        );
-
-                    document
-                        .querySelectorAll(".view-panel")
-                        .forEach(
-                            panel => {
-                                panel.hidden =
-                                    panel.id !== this.dataset.view;
-                            }
-                        );
-
-                    this.classList.add("active");
-
-                }
-            );
-
-        }
-    );
-
-
 // =====================================================
 // ESTADO
 // =====================================================
@@ -151,14 +97,6 @@ document
 let activeFilter = "all";
 
 let currentUnits = [];
-
-let currentConductors = [];
-
-let currentConductorDocuments = [];
-
-let currentTractoDocuments = [];
-
-let currentTractos = [];
 
 
 // =====================================================
@@ -246,231 +184,6 @@ function escapeHTML(value) {
 
 }
 
-function renderConductors(conductors) {
-
-    if (!driversContainer) {
-        return;
-    }
-
-    if (driverCount) {
-        driverCount.innerText = conductors.length;
-    }
-
-    if (conductors.length === 0) {
-        driversContainer.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-code">NO DATA</div>
-                <div class="empty-title">SIN CONDUCTORES REGISTRADOS</div>
-                <div class="empty-text">Todavía no existen conductores disponibles en FleetOps.</div>
-            </div>
-        `;
-        return;
-    }
-
-    driversContainer.innerHTML = conductors.map(function (conductor) {
-        return `
-            <article class="driver-card">
-                <div class="driver-card-header">
-                    <div>
-                        <div class="driver-card-id">${escapeHTML(conductor.driver_id)}</div>
-                        <div class="driver-card-name">${escapeHTML(conductor.nombre)}</div>
-                    </div>
-                    <div class="driver-state">${escapeHTML(conductor.estado || "SIN ESTADO")}</div>
-                </div>
-                <div class="driver-data">
-                    <div class="data-row">
-                        <span class="data-label">RUT</span>
-                        <span class="data-value">${escapeHTML(conductor.rut || "--")}</span>
-                    </div>
-
-                    <div class="data-row">
-                        <span class="data-label">LICENCIA</span>
-                        <span class="data-value">${escapeHTML(conductor.licencia || "--")}</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">TELÉFONO</span>
-                        <span class="data-value">${escapeHTML(conductor.telefono || "--")}</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">TIPO DE LICENCIA</span>
-                        <span class="data-value">${escapeHTML(conductor.tipo_licencia || "--")}</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">CIUDAD</span>
-                        <span class="data-value">${escapeHTML(conductor.ciudad || "--")}</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">PATENTE HABITUAL</span>
-                        <span class="data-value">${escapeHTML(conductor.patente_habitual || "--")}</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">FECHA DE REGISTRO</span>
-                        <span class="data-value">${escapeHTML(formatTimestamp(conductor.fecha_registro))}</span>
-                    </div>
-                </div>
-                <button type="button" class="driver-profile-button" data-driver-id="${escapeHTML(conductor.id)}">VER PERFIL OPERATIVO</button>
-            </article>
-        `;
-    }).join("");
-
-}
-
-function renderProfileTimeline(timeline) {
-
-    if (!timeline || timeline.length === 0) {
-        return `<div class="profile-document-status">Sin eventos registrados.</div>`;
-    }
-
-    return timeline.map(function (event) {
-        return `
-            <div class="profile-timeline-event">
-                <strong>${escapeHTML(event.estado || "SIN ESTADO")}</strong>
-                <div class="timeline-time">${escapeHTML(formatTimestamp(event.start))}</div>
-                <div class="data-value">Duración: ${escapeHTML(event.duration || "--")}</div>
-                ${event.observacion ? `<div class="timeline-observation">${escapeHTML(event.observacion)}</div>` : ""}
-            </div>
-        `;
-    }).join("");
-
-}
-
-function openDriverProfile(driverId) {
-
-    const conductor =
-        currentConductors.find(function (item) {
-            return item.id === driverId;
-        });
-
-    if (!conductor || !driverProfileModal || !driverProfileContent) {
-        return;
-    }
-
-    const operation =
-        currentUnits.find(function (unit) {
-            return unit.conductor_id === driverId && unit.estado !== "Finalizado";
-        }) ||
-        currentUnits.find(function (unit) {
-            return unit.conductor_id === driverId;
-        });
-
-    const conductorDocuments =
-        currentConductorDocuments.filter(function (document) {
-            return document.conductor_id === driverId;
-        });
-
-    const assignedTractor =
-        conductor.tracto_id
-            ? currentTractos.find(function (tractor) {
-                return tractor.id === conductor.tracto_id;
-            })
-            : null;
-
-    const tractorDocuments =
-        assignedTractor
-            ? currentTractoDocuments.filter(function (document) {
-                return document.tracto_id === assignedTractor.id;
-            })
-            : [];
-
-    profileDriverId.innerText =
-        conductor.driver_id || "SIN DRIVER ID";
-
-    driverProfileContent.innerHTML = `
-        <section class="profile-section">
-            <div class="profile-section-title">IDENTIDAD</div>
-            <div class="profile-grid">
-                <div class="data-row"><span class="data-label">NOMBRE</span><span class="data-value">${escapeHTML(conductor.nombre)}</span></div>
-                <div class="data-row"><span class="data-label">RUT</span><span class="data-value">${escapeHTML(conductor.rut || "--")}</span></div>
-                <div class="data-row"><span class="data-label">TELÉFONO</span><span class="data-value">${escapeHTML(conductor.telefono || "--")}</span></div>
-                <div class="data-row"><span class="data-label">CIUDAD</span><span class="data-value">${escapeHTML(conductor.ciudad || "--")}</span></div>
-                <div class="data-row"><span class="data-label">TIPO DE LICENCIA</span><span class="data-value">${escapeHTML(conductor.tipo_licencia || "--")}</span></div>
-                <div class="data-row"><span class="data-label">ESTADO</span><span class="data-value">${escapeHTML(conductor.estado || "--")}</span></div>
-            </div>
-        </section>
-        <section class="profile-section">
-            <div class="profile-section-title">EQUIPO</div>
-            <div class="profile-grid">
-                <div class="data-row"><span class="data-label">PATENTE</span><span class="data-value">${escapeHTML(assignedTractor?.patente || conductor.patente_habitual || "--")}</span></div>
-                <div class="data-row"><span class="data-label">ESTADO</span><span class="data-value">${escapeHTML(assignedTractor?.estado || "--")}</span></div>
-            </div>
-        </section>
-        <section class="profile-section">
-            <div class="profile-section-title">DOCUMENTACIÓN</div>
-            <div class="profile-grid">
-                <div class="profile-document-status ${conductor.licencia ? "available" : ""}">
-                    LICENCIA: ${escapeHTML(conductor.licencia || "SIN REGISTRO")}
-                </div>
-                <div class="profile-document-status ${conductorDocuments.length ? "available" : ""}">
-                    ARCHIVOS DE LICENCIA: ${conductorDocuments.length || "SIN ARCHIVOS"}
-                </div>
-                ${conductorDocuments.map(function (document) {
-                    return `<div class="profile-document-status">${escapeHTML(document.tipo_documento)} · ${escapeHTML(document.estado_revision)} · ${escapeHTML(document.nombre_archivo || document.storage_path)}</div>`;
-                }).join("")}
-            </div>
-        </section>
-        <section class="profile-section">
-            <div class="profile-section-title">OPERACIÓN ACTUAL</div>
-            ${operation ? `
-                <div class="profile-grid">
-                    <div class="data-row"><span class="data-label">EQUIPO / PATENTE</span><span class="data-value">${escapeHTML(operation.patente || "--")}</span></div>
-                    <div class="data-row"><span class="data-label">ESTADO</span><span class="data-value">${escapeHTML(operation.estado || "--")}</span></div>
-                    <div class="data-row"><span class="data-label">RUTA</span><span class="data-value">${escapeHTML(operation.ruta || "--")}</span></div>
-                    <div class="data-row"><span class="data-label">EMPRESA</span><span class="data-value">${escapeHTML(operation.empresa || "--")}</span></div>
-                    <div class="data-row"><span class="data-label">ÚLTIMO EVENTO</span><span class="data-value">${escapeHTML(formatTimestamp(operation.timestamp))}</span></div>
-                    <div class="data-row"><span class="data-label">DURACIÓN</span><span class="data-value">${escapeHTML(operation.estado === "Finalizado" ? "--" : formatLiveDuration(operation.timestamp || operation.fecha_inicio))}</span></div>
-                </div>
-                <div class="profile-section-title">TIMELINE</div>
-                ${renderProfileTimeline(operation.timeline)}
-                <div class="profile-section-title">DOCUMENTOS DEL EQUIPO</div>
-                ${tractorDocuments.length
-                    ? tractorDocuments.map(function (document) {
-                        return `<div class="profile-document-status">${escapeHTML(document.tipo_documento)} · ${escapeHTML(document.estado_revision)} · ${escapeHTML(document.nombre_archivo || document.storage_path)}</div>`;
-                    }).join("")
-                    : `<div class="profile-document-status">Sin documentos de equipo registrados.</div>`}
-                ${operation.google_maps ? `<a class="maps-button" href="${escapeHTML(operation.google_maps)}" target="_blank" rel="noopener noreferrer">VER EN GOOGLE MAPS</a>` : ""}
-            ` : `<div class="profile-document-status">Sin operación actual asociada.</div>`}
-        </section>
-    `;
-
-    driverProfileModal.hidden = false;
-
-}
-
-function closeDriverProfile() {
-
-    if (driverProfileModal) {
-        driverProfileModal.hidden = true;
-    }
-
-}
-
-document.addEventListener("click", function (event) {
-
-    const profileButton =
-        event.target.closest(".driver-profile-button");
-
-    if (profileButton) {
-        openDriverProfile(profileButton.dataset.driverId);
-        return;
-    }
-
-    if (event.target === driverProfileModal) {
-        closeDriverProfile();
-    }
-
-});
-
-document
-    .getElementById("closeDriverProfile")
-    ?.addEventListener("click", closeDriverProfile);
-
-document.addEventListener("keydown", function (event) {
-    if (event.key === "Escape") {
-        closeDriverProfile();
-    }
-});
-
-
 // =====================================================
 // CLASE CSS DEL ESTADO
 // =====================================================
@@ -481,6 +194,9 @@ function getStatusClass(status) {
 
         case "En ruta":
             return "green";
+
+        case "Espera de reporte":
+            return "yellow";
 
         case "Esperando carga":
             return "yellow";
@@ -521,6 +237,9 @@ function getStatusPriority(status) {
 
         case "En ruta":
             return 2;
+
+        case "Espera de reporte":
+            return 3;
 
         case "Esperando carga":
             return 3;
@@ -812,7 +531,9 @@ function updateSummary(units) {
                 unit.estado ===
                     "Esperando carga" ||
                 unit.estado ===
-                    "Esperando descarga"
+                    "Esperando descarga" ||
+                unit.estado ===
+                    "Espera de reporte"
         ).length;
 
 
@@ -1656,140 +1377,6 @@ function buildUnits(
 
 
 // =====================================================
-// FALLBACK LEGACY
-// =====================================================
-
-function buildLegacyUnits(
-    reports,
-    conductorsById
-) {
-
-    const latestByPlate = {};
-
-
-    reports.forEach(
-        report => {
-
-            const plate =
-                normalizePlate(
-                    report.patente
-                );
-
-
-            if (!plate) {
-                return;
-            }
-
-            // Sin conductor no hay unidad: el tracto nunca se muestra solo.
-            if (!report.conductor_id && !report.conductor) {
-                return;
-            }
-
-
-            const existing =
-                latestByPlate[plate];
-
-
-            if (
-                !existing ||
-                new Date(report.timestamp) >
-                new Date(existing.timestamp)
-            ) {
-
-                const conductorRecord =
-                    report.conductor_id
-                        ? conductorsById[report.conductor_id]
-                        : null;
-
-                latestByPlate[plate] = {
-
-                    viaje_id:
-                        report.viaje_id ||
-                        null,
-
-                    driver_id:
-                        conductorRecord?.driver_id ||
-                        null,
-
-                    patente:
-                        plate,
-
-                    conductor:
-                        conductorRecord?.nombre ||
-                        report.conductor ||
-                        null,
-
-                    empresa:
-                        report.empresa ||
-                        null,
-
-                    ruta:
-                        report.ruta ||
-                        null,
-
-                    estado:
-                        report.estado ||
-                        "En ruta",
-
-                    fecha_inicio:
-                        report.timestamp ||
-                        report.created_at,
-
-                    fecha_finalizacion:
-                        report.estado ===
-                        "Finalizado"
-                            ? report.timestamp
-                            : null,
-
-                    timestamp:
-                        report.timestamp ||
-                        report.created_at,
-
-                    latitud:
-                        report.latitud ??
-                        null,
-
-                    longitud:
-                        report.longitud ??
-                        null,
-
-                    precision_gps:
-                        report.precision_gps ??
-                        null,
-
-                    google_maps:
-                        report.google_maps ??
-                        null,
-
-                    observacion:
-                        report.observacion ||
-                        null,
-
-                    incident_category:
-                        report.incident_category ||
-                        null,
-
-                    has_report:
-                        true,
-
-                    timeline: []
-
-                };
-
-            }
-
-        }
-    );
-
-
-    return Object.values(
-        latestByPlate
-    );
-
-}
-
-
-// =====================================================
 // ORDENAR UNIDADES
 // =====================================================
 
@@ -1901,12 +1488,16 @@ async function loadTrips() {
 // CARGAR REPORTES
 // =====================================================
 
-async function loadReports() {
+async function loadReports(tripIds) {
 
     console.log(
         "FLEETOPS: cargando reportes..."
     );
 
+    // reportes no tiene organización; el alcance son los viajes de la org activa.
+    if (!tripIds.length) {
+        return [];
+    }
 
     const {
         data,
@@ -1935,6 +1526,10 @@ async function loadReports() {
                 timestamp,
                 created_at
             `)
+            .in(
+                "viaje_id",
+                tripIds
+            )
             .order(
                 "timestamp",
                 {
@@ -1973,27 +1568,17 @@ async function loadConductors() {
         error
     } =
         await supabaseClient
-            .from("conductores")
+            .from("organization_drivers")
             .select(`
-                id,
-                driver_id,
-                nombre,
-                telefono,
-                rut,
-                licencia,
-                tipo_licencia,
-                ciudad,
-                patente_habitual,
-                estado,
-                tracto_id,
-                licencia_vencimiento,
-                fecha_registro
+                conductor:conductores(
+                    id,
+                    driver_id,
+                    nombre
+                )
             `)
-            .order(
-                "fecha_registro",
-                {
-                    ascending: false
-                }
+            .eq(
+                "organization_id",
+                activeOrganizationId
             );
 
     if (error) {
@@ -2003,46 +1588,11 @@ async function loadConductors() {
         );
     }
 
-    return data || [];
-
-}
-
-async function loadDocumentData() {
-
-    const [
-        tractorsResponse,
-        conductorDocumentsResponse,
-        tractorDocumentsResponse
-    ] =
-        await Promise.all([
-            supabaseClient
-                .from("tractos")
-                .select("id, patente"),
-            supabaseClient
-                .from("conductor_documentos")
-                .select("id, conductor_id, tipo_documento, storage_path, nombre_archivo, estado_revision, fecha_carga"),
-            supabaseClient
-                .from("tracto_documentos")
-                .select("id, tracto_id, tipo_documento, storage_path, nombre_archivo, estado_revision, fecha_carga")
-        ]);
-
-    const failedResponse = [
-        tractorsResponse,
-        conductorDocumentsResponse,
-        tractorDocumentsResponse
-    ].find(function (response) {
-        return response.error;
-    });
-
-    if (failedResponse) {
-        throw new Error(failedResponse.error.message);
-    }
-
-    return {
-        tractors: tractorsResponse.data || [],
-        conductorDocuments: conductorDocumentsResponse.data || [],
-        tractorDocuments: tractorDocumentsResponse.data || []
-    };
+    return (data || [])
+        .map(function (row) {
+            return row.conductor;
+        })
+        .filter(Boolean);
 
 }
 
@@ -2054,11 +1604,8 @@ async function loadDocumentData() {
 function renderDashboard(
     trips,
     reports,
-    conductors,
-    documentData
+    conductors
 ) {
-
-    let units;
 
     const conductorsById =
         conductors.reduce(
@@ -2069,69 +1616,18 @@ function renderDashboard(
             {}
         );
 
-
-    if (
-        trips.length > 0
-    ) {
-
-        console.log(
-            "FLEETOPS: usando VIAJES + REPORTES."
-        );
-
-
-            units =
-            buildUnits(
-                trips.filter(function (trip) {
-                    return !trip.fecha_finalizacion;
-                }),
-                reports,
-                conductorsById
-            );
-
-    }
-
-    else {
-
-        console.log(
-            "FLEETOPS: tabla VIAJES vacía. " +
-            "Usando REPORTES como fallback."
-        );
-
-
-        units =
-            buildLegacyUnits(
-                reports,
-                conductorsById
-            );
-
-    }
-
-
-    units =
+    const units =
         sortUnits(
-            units
+            buildUnits(
+                trips,
+                reports,
+                conductorsById
+            )
         );
 
 
     currentUnits =
         units;
-
-    currentConductors =
-        conductors;
-
-    currentTractos =
-        documentData.tractors;
-
-    currentConductorDocuments =
-        documentData.conductorDocuments;
-
-    currentTractoDocuments =
-        documentData.tractorDocuments;
-
-    renderConductors(
-        conductors
-    );
-
 
     updateSummary(
         units
@@ -2175,24 +1671,15 @@ async function loadDashboard() {
 
     try {
 
-        const [
-            trips,
-            reports
-        ] =
-            await Promise.all(
-                [
-                    loadTrips(),
-                    loadReports()
-                ]
+        const trips =
+            await loadTrips();
+
+        const reports =
+            await loadReports(
+                trips.map(function (trip) {
+                    return trip.id;
+                })
             );
-
-        const tripIds = new Set(
-            trips.map(trip => trip.id)
-        );
-
-        const organizationReports = reports.filter(
-            report => tripIds.has(report.viaje_id)
-        );
 
         let conductors = [];
 
@@ -2207,24 +1694,6 @@ async function loadDashboard() {
             );
         }
 
-        let documentData = {
-            tractors: [],
-            conductorDocuments: [],
-            tractorDocuments: []
-        };
-
-        try {
-            documentData =
-                await loadDocumentData();
-        }
-        catch (documentError) {
-            console.error(
-                "FLEETOPS: error cargando documentos",
-                documentError
-            );
-        }
-
-
         setConnectionStatus(
             true
         );
@@ -2232,9 +1701,8 @@ async function loadDashboard() {
 
         renderDashboard(
             trips,
-            organizationReports,
-            conductors,
-            documentData
+            reports,
+            conductors
         );
 
     }

@@ -1104,16 +1104,6 @@ background:#1d4ed8;
     CONDUCTORES
 ===================================================== */
 
-.drivers-container{
-
-display:grid;
-
-grid-template-columns:repeat(2,minmax(0,1fr));
-
-gap:12px;
-
-}
-
 .driver-card{
 
 background:var(--panel);
@@ -1184,103 +1174,6 @@ white-space:nowrap;
 .driver-state.gray{color:var(--gray);border-color:var(--gray)}
 .driver-state.red{color:var(--red);border-color:var(--red)}
 
-.driver-data{
-
-border-top:1px solid var(--border);
-
-padding-top:14px;
-
-display:grid;
-
-grid-template-columns:1fr 1fr;
-
-gap:12px;
-
-}
-
-.driver-profile-button{
-display:block;
-width:100%;
-margin-top:16px;
-padding:11px;
-background:var(--panel2);
-border:1px solid var(--border);
-color:var(--white);
-font-family:"JetBrains Mono",monospace;
-font-size:9px;
-font-weight:600;
-letter-spacing:.6px;
-cursor:pointer;
-}
-
-.driver-profile-button:hover{
-border-color:var(--white);
-}
-
-.profile-modal{
-position:fixed;
-inset:0;
-z-index:20;
-display:flex;
-align-items:center;
-justify-content:center;
-padding:20px;
-background:rgba(10,13,17,.82);
-}
-
-.profile-modal[hidden]{
-display:none;
-}
-
-.profile-dialog{
-width:100%;
-max-width:680px;
-max-height:90vh;
-overflow:auto;
-background:var(--panel);
-border:1px solid var(--border);
-padding:20px;
-}
-
-.profile-dialog-header{
-display:flex;
-justify-content:space-between;
-align-items:flex-start;
-gap:20px;
-padding-bottom:16px;
-border-bottom:1px solid var(--border);
-}
-
-.profile-driver-id{
-margin-top:5px;
-font-family:"JetBrains Mono",monospace;
-font-size:12px;
-color:var(--steel);
-}
-
-.profile-close{
-background:transparent;
-border:1px solid var(--border);
-color:var(--white);
-font-size:22px;
-line-height:1;
-width:34px;
-height:34px;
-cursor:pointer;
-}
-
-.profile-section{
-margin-top:20px;
-}
-
-.profile-section-title{
-font-family:"JetBrains Mono",monospace;
-font-size:9px;
-letter-spacing:1px;
-color:var(--steel);
-margin-bottom:12px;
-}
-
 .profile-grid{
 display:grid;
 grid-template-columns:repeat(2,minmax(0,1fr));
@@ -1293,11 +1186,6 @@ background:var(--panel2);
 border:1px solid var(--border);
 font-size:11px;
 color:var(--steel);
-}
-
-.profile-document-status.available{
-border-color:var(--green);
-color:var(--green);
 }
 
 .profile-timeline-event{
@@ -1454,12 +1342,6 @@ repeat(2,1fr);
 column-count:1;
 
 }
-
-    .drivers-container{
-
-grid-template-columns:1fr;
-
-    }
 
 
 .toolbar{

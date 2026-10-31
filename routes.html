@@ -13,12 +13,12 @@
 <header class="header"><div><div class="title">PRÆTOR FleetOps</div><div class="subtitle">OPERATION CONFIGURATION</div></div></header>
 <nav class="dashboard-nav"><a class="nav-button" href="dashboard.html">OPERACIONES</a><a class="nav-button" href="conductores.html">CONDUCTORES</a><a class="nav-button active" href="routes.html">RUTAS</a><a class="nav-button" href="equipo.html">CONFIGURACIÓN · EQUIPO</a></nav>
 <section class="route-layout">
-<div class="route-panel"><div class="section-title">NUEVA RUTA</div><form id="routeForm"><label for="organizationSelect">ORGANIZACIÓN</label><select id="organizationSelect" required></select><label for="routeName">RUTA</label><input id="routeName" required placeholder="Ej. Coya Sur ↔ Puerto Angamos"><button class="primary-action" type="submit">CREAR RUTA</button><div id="routeError" class="route-error"></div></form></div>
+<div class="route-panel" id="routePanel" hidden><div class="section-title">NUEVA RUTA</div><form id="routeForm"><label for="organizationSelect">ORGANIZACIÓN</label><select id="organizationSelect" required></select><label for="routeName">RUTA</label><input id="routeName" required placeholder="Ej. Coya Sur ↔ Puerto Angamos"><button class="primary-action" type="submit">CREAR RUTA</button><div id="routeError" class="route-error"></div></form></div>
 </section>
 <section class="route-list-header"><div class="section-title">RUTAS CONFIGURADAS</div></section>
 <main id="routesContainer" class="routes-container"><div class="empty-state"><div class="empty-title">CARGANDO RUTAS</div></div></main>
 <footer>PRÆTOR TECHNOLOGIES · FleetOps</footer>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/supabase-config.js"></script><script src="js/supabase.js"></script><script src="js/organization-context.js"></script><script src="js/routes.js?v=2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js" integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK" crossorigin="anonymous"></script><script src="js/supabase-config.js"></script><script src="js/supabase.js"></script><script src="js/organization-context.js"></script><script src="js/routes.js?v=3"></script>
 </body>
 </html>

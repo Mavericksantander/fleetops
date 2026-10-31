@@ -32,7 +32,7 @@ CONNECTING
 
 <nav class="dashboard-nav" aria-label="Secciones FleetOps">
 
-<button class="nav-button active" data-view="operationsView">
+<button class="nav-button active" type="button">
 OPERACIONES
 </button>
 
@@ -43,10 +43,6 @@ CONDUCTORES
 
 <a class="nav-button" href="routes.html">
 RUTAS
-</a>
-
-<a class="nav-button" href="equipo.html">
-CLIENTES
 </a>
 
 <a class="nav-button" href="equipo.html">
@@ -360,25 +356,6 @@ id="fleetContainer"
 class="fleet-container">
 
 
-<div id="driverProfileModal" class="profile-modal" hidden>
-
-<div class="profile-dialog" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
-
-<div class="profile-dialog-header">
-<div>
-<div class="section-title" id="profileTitle">PERFIL DEL CONDUCTOR</div>
-<div class="profile-driver-id" id="profileDriverId">--</div>
-</div>
-<button type="button" class="profile-close" id="closeDriverProfile" aria-label="Cerrar perfil">×</button>
-</div>
-
-<div id="driverProfileContent"></div>
-
-</div>
-
-</div>
-
-
 <div class="empty-state">
 
 <div class="empty-code">
@@ -404,50 +381,6 @@ El dashboard está esperando conexión con la fuente de datos.
 </section>
 
 
-<section id="driversView" class="view-panel" hidden>
-
-<section class="toolbar">
-
-<div class="section-title">
-CONDUCTORES
-</div>
-
-<div class="last-update">
-
-REGISTROS
-
-<span id="driverCount">
-0
-</span>
-
-</div>
-
-</section>
-
-
-<main id="driversContainer" class="drivers-container">
-
-<div class="empty-state">
-
-<div class="empty-code">
-WAIT
-</div>
-
-<div class="empty-title">
-ESPERANDO CONDUCTORES
-</div>
-
-<div class="empty-text">
-La vista está esperando conexión con la fuente de datos.
-</div>
-
-</div>
-
-</main>
-
-</section>
-
-
 
 <footer>
 
@@ -460,11 +393,11 @@ PRÆTOR TECHNOLOGIES · FleetOps
 
 
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js" integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK" crossorigin="anonymous"></script>
 <script src="js/supabase-config.js"></script>
 <script src="js/supabase.js"></script>
 <script src="js/organization-context.js"></script>
-<script src="js/dashboard.js?v=4"></script>
+<script src="js/dashboard.js?v=5"></script>
 
 
 </body>
