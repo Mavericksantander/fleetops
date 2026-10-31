@@ -1505,6 +1505,12 @@ function buildUnits(
     trips.forEach(
         trip => {
 
+            // El tracto va ligado al conductor: un viaje sin conductor
+            // (desasignado) no genera una tarjeta suelta solo con la patente.
+            if (!trip.conductor_id) {
+                return;
+            }
+
             const tripReports =
                 reports.filter(
                     report =>
@@ -1671,6 +1677,11 @@ function buildLegacyUnits(
 
 
             if (!plate) {
+                return;
+            }
+
+            // Sin conductor no hay unidad: el tracto nunca se muestra solo.
+            if (!report.conductor_id && !report.conductor) {
                 return;
             }
 
