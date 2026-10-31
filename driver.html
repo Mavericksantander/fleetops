@@ -69,6 +69,7 @@ input:focus,select:focus{border-color:var(--accent);}
 }
 .copy-btn:hover{border-color:var(--white);}
 .operation-btn{display:block;width:100%;padding:14px;background:#2563eb;color:white;text-decoration:none;font-family:"JetBrains Mono";font-size:11px;letter-spacing:1px;cursor:pointer;margin-bottom:12px;}
+.operation-btn[hidden]{display:none !important;}
 .success-msg{font-size:12px;color:var(--steel);line-height:1.5;}
 </style>
 </head>
@@ -163,7 +164,7 @@ input:focus,select:focus{border-color:var(--accent);}
       </div>
       <div class="step-actions">
         <button type="button" class="back-step">VOLVER</button>
-          <button type="button" class="send next-step">CONTINUAR</button>
+          <button type="button" class="send next-step" disabled>CONTINUAR</button>
       </div>
     </section>
 
@@ -175,16 +176,16 @@ input:focus,select:focus{border-color:var(--accent);}
         <input name="patente_habitual" placeholder="AB-CD-12" style="text-transform:uppercase" required>
 
         <label>PERMISO DE CIRCULACIÓN</label>
-        <input name="permiso_circulacion" type="file" accept="image/*,.pdf" required>
+        <input name="permiso_circulacion" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,application/pdf,.jpg,.jpeg,.png,.webp,.gif,.heic,.heif,.pdf" required>
 
         <label>SOAP</label>
-        <input name="soap" type="file" accept="image/*,.pdf" required>
+        <input name="soap" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,application/pdf,.jpg,.jpeg,.png,.webp,.gif,.heic,.heif,.pdf" required>
 
         <label>REVISIÓN TÉCNICA / HOMOLOGACIÓN</label>
-        <input name="revision_tecnica" type="file" accept="image/*,.pdf" required>
+        <input name="revision_tecnica" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,application/pdf,.jpg,.jpeg,.png,.webp,.gif,.heic,.heif,.pdf" required>
 
         <label>PADRÓN / CERTIFICADO DE INSCRIPCIÓN</label>
-        <input name="padron" type="file" accept="image/*,.pdf" required>
+        <input name="padron" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,application/pdf,.jpg,.jpeg,.png,.webp,.gif,.heic,.heif,.pdf" required>
       </div>
       <div class="step-actions">
         <button type="button" class="back-step">VOLVER</button>
@@ -214,6 +215,6 @@ input:focus,select:focus{border-color:var(--accent);}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js" integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK" crossorigin="anonymous"></script>
 <script src="js/supabase-config.js"></script>
 <script src="js/supabase.js"></script>
-<script src="js/driver.js?v=5"></script>
+<script src="js/driver.js?v=6"></script>
 </body>
 </html>
