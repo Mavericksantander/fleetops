@@ -49,9 +49,25 @@ baseline en producción, sin correrlo, está en `supabase/MIGRATIONS.md`.
 La visibilidad de clientes (rol `customer`, `customers`, `customer_users`,
 accesos por operación o ruta, invitación y acceso dual sin perder el rol
 interno) ya está en el baseline. `create_customer_for_organization` asocia el
-cliente a la organización seleccionada. Quien conozca un UUID de viaje puede
-resolverlo de forma anónima; un customer autenticado solo resuelve viajes
-autorizados.
+cliente a la organización seleccionada. Sin sesión, `resolve_viaje_public` solo resuelve viajes activos y no devuelve
+conductor, patente ni IDs (`20261028131700`); un customer autenticado solo
+resuelve viajes autorizados.
+
+Después del baseline (ver `supabase/MIGRATIONS.md`):
+
+- `20261028131700_resolve_viaje_public_anon_minimal` (#25): respuesta mínima
+  para anon, solo viajes activos.
+- `20261029020000_report_identity_tracto_invite` (#26): `submit_driver_report`
+  exige patente normalizada y conductor resuelto; un cambio de `tracto_id`
+  exige un tracto de la org del usuario; `consume_organization_driver_invite`
+  sin EXECUTE para el API; se elimina `finalizar_viaje(text)`.
+- `20261029030000_tractos_select_returning` (#28): la policy SELECT de
+  `tractos` evalúa `organization_id` de la fila para que `INSERT ... RETURNING`
+  no falle con 42501, sin abrir lectura entre organizaciones.
+
+Cada migración posterior a `20261028002755` tiene su reversión en
+`supabase/migrations/down/<versión>_<nombre>.down.sql`. `db push` no lee
+`down/`; se ejecuta a mano solo si hay que revertir.
 
 El owner global es una fila de `public.fleetops_platform_owners`, no un email
 en el repositorio. Puede crear organizaciones y una invitación para el primer
@@ -65,9 +81,12 @@ baseline: el panel la llama, pero no forma parte de este historial.
 for f in js/*.js scripts/*.mjs; do node --check "$f"; done
 ```
 
-El mismo chequeo corre en `.github/workflows/checks.yml`. Los tests SQL
-(`python supabase/tests/local/run_local.py`) necesitan Postgres local y psycopg;
-no están en CI.
+`.github/workflows/checks.yml` corre ese chequeo y `npm test` (tests de
+frontend en `tests/frontend/*.test.mjs`, p. ej. el tracto ligado al conductor
+de #30). Los tests SQL (`python supabase/tests/local/run_local.py "dbname=..."`)
+aplican shim, migraciones y `supabase/tests/*.sql` (aislamiento RLS de dos
+tenants y usuario sin org de #24, más los tests de #25, #26 y #28). Necesitan
+Postgres local y psycopg; no están en CI.
 
 ## Configuracion local y GitHub
 

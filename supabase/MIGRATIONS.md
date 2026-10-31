@@ -15,6 +15,16 @@ No se escribió nada en producción ni en PREPROD.
 | `20261027210000` | `storage_policy_cleanup.sql` | Un statement, md5 `06580c40897b4325913645ddb9b727ef`, igual al archivo tras #8 (no la versión de #7). |
 | `20261028002755` | `onboarding_invite_binding.sql` | Alineada con prod (renombrada en #12). Un statement, md5 `2e270e8b3ceb8b29648128304a671d55`, igual al archivo. |
 
+### Migraciones posteriores (#25, #26, #28)
+
+| Versión | Archivo | Reversión | Estado remoto |
+|---|---|---|---|
+| `20261028131700` | `resolve_viaje_public_anon_minimal.sql` | `down/20261028131700_resolve_viaje_public_anon_minimal.down.sql` | No verificado en este documento |
+| `20261029020000` | `report_identity_tracto_invite.sql` | `down/20261029020000_report_identity_tracto_invite.down.sql` | No verificado en este documento |
+| `20261029030000` | `tractos_select_returning.sql` | `down/20261029030000_tractos_select_returning.down.sql` | No verificado en este documento |
+
+La tabla de arriba (y los pasos 2 y 4 del plan de repair, que hablan de 6 versiones) reflejan la consulta del 2026-10-27. El repo tiene hoy 9 versiones. Antes de un `db push`, comparar `supabase migration list --linked` con estas 9 versiones; no asumir que estas tres están aplicadas en prod o PREPROD. Los tests locales de cada una están en `supabase/tests/` y corren con `supabase/tests/local/run_local.py`.
+
 T012 estaba versionado `20261027000100`. Con ese nombre, `db push` no reconoce la fila de prod e intentaría aplicar el baseline y T012. El rename iguala la versión; el SQL no cambió.
 
 ## Repair
