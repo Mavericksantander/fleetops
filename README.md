@@ -61,6 +61,7 @@ baseline: el panel la llama, pero no forma parte de este historial.
 
 ```bash
 for f in js/*.js scripts/*.mjs; do node --check "$f"; done
+npm test
 node scripts/test-login-next.mjs
 node scripts/test-build-config.mjs
 SUPABASE_URL=https://example.supabase.co SUPABASE_ANON_KEY=sb_publishable_local npm run build
