@@ -18,9 +18,21 @@ if not skip:
     files.append(root/'tests/report_identity_tracto_invite_test.sql')
     files.append(root/'tests/tracto_org_two_tenants_test.sql')
     files.append(root/'tests/org_active_scope_test.sql')
+    files.append(root/'tests/customer_write_roles_test.sql')
+    files.append(root/'tests/viajes_cross_org_binding_test.sql')
 with psycopg.connect(sys.argv[1], autocommit=True) as c:
     c.add_notice_handler(lambda d: print('  NOTICE:', d.message_primary))
     for f in files:
         print('==>', f.relative_to(root))
-        c.execute(f.read_text())
+        if f.parent.name == 'tests':
+            # Aislamiento: cada test corre en su propia transacción y se revierte,
+            # así los fixtures (UUIDs fijos) no chocan entre tests.
+            c.execute('begin')
+            try:
+                c.execute(f.read_text())
+            finally:
+                c.execute('rollback')
+                c.execute('reset role')
+        else:
+            c.execute(f.read_text())
 print('OK: todo aplicado y todas las aserciones pasaron')
