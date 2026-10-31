@@ -663,15 +663,7 @@ function showSuccess(
     existed
 ) {
 
-    const operationLink =
-        document.getElementById("operationBtn");
-
     try {
-        localStorage.setItem(
-            "fleetops.driver_id",
-            driverId
-        );
-
         localStorage.setItem(
             "fleetops.driver_name",
             nombre
@@ -682,11 +674,6 @@ function showSuccess(
             "DRIVER: no fue posible guardar la identidad local",
             storageError
         );
-    }
-
-    if (operationLink) {
-        operationLink.href =
-            `reportes.html?driver_id=${encodeURIComponent(driverId)}`;
     }
 
     driverForm.style.display = "none";

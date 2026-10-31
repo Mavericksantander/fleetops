@@ -186,22 +186,10 @@ function getTripIdFromUrl(){
 
 function getStoredDriverId(){
 
-    const queryDriverId =
+    return normalizeDriverId(
         new URLSearchParams(window.location.search)
-            .get("driver_id");
-
-    if(queryDriverId){
-        return normalizeDriverId(queryDriverId);
-    }
-
-    try{
-        return normalizeDriverId(
-            localStorage.getItem("fleetops.driver_id")
-        );
-    }
-    catch(error){
-        return "";
-    }
+            .get("driver_id")
+    );
 
 }
 
@@ -1105,9 +1093,6 @@ fleetForm.addEventListener(
                     });
 
                 try{
-                    if(submitted?.driver_id){
-                        localStorage.setItem("fleetops.driver_id", submitted.driver_id);
-                    }
                     if(submitted?.conductor){
                         localStorage.setItem("fleetops.driver_name", submitted.conductor);
                     }
@@ -1117,7 +1102,8 @@ fleetForm.addEventListener(
                 }
 
                 window.location.replace(
-                    "success.html"
+                    "success.html?viaje=" +
+                    encodeURIComponent(tripIdFromUrl)
                 );
 
                 return;
