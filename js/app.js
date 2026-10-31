@@ -963,6 +963,13 @@ fleetForm.addEventListener(
             const tripIdFromUrl =
                 getTripIdFromUrl();
 
+            if(!tripIdFromUrl){
+                alert("Escanea el QR del viaje entregado por la torre de control para reportar.");
+                submitButton.disabled = false;
+                submitButton.innerText = "ENVIAR ACTUALIZACIÓN";
+                return;
+            }
+
             const tripContext =
                 tripIdFromUrl
                     ? await getTripById(tripIdFromUrl)
@@ -1111,234 +1118,11 @@ fleetForm.addEventListener(
 
             }
 
-            const {
-                data: sessionData
-            } =
-                await supabaseClient.auth.getSession();
-
-            if(!sessionData?.session){
-                throw new Error(
-                    "Escanea el QR del viaje entregado por la torre de control para reportar."
-                );
-            }
-
-            // =========================================
-            // IDENTIFICAR CONDUCTOR
-            // =========================================
-
-            const conductorRecord =
-                await resolveConductorIdentity({
-                    driverId:
-                        driverId,
-
-                    rut:
-                        rut,
-
-                    telefono:
-                        telefono,
-
-                    conductor:
-                        conductor
-                });
-
-
-            const conductor_id =
-                conductorRecord?.id || null;
-
-            const resolvedConductor =
-                conductorRecord?.nombre ||
-                conductor;
-
-            if(driverIdInput && driverId){
-                driverIdInput.value =
-                    conductorRecord.driver_id ||
-                    driverId;
-            }
-
-            if(conductorInput && conductorRecord?.nombre){
-                conductorInput.value =
-                    conductorRecord.nombre;
-                conductorInput.readOnly = true;
-            }
-
-            setIdentityStatus(
-                conductor_id
-                    ? "IDENTIDAD RESUELTA · OPERACIÓN ASOCIADA"
-                    : "MODO LEGACY · IDENTIDAD SIN conductor_id"
-            );
-
-
-            // =========================================
-            // OBTENER / CREAR VIAJE
-            // =========================================
-
-            const trip =
-                await getOrCreateTrip({
-
-                    patente:
-                        patente,
-
-                    conductor:
-                        resolvedConductor,
-
-                    conductor_id:
-                        conductor_id,
-
-                    empresa:
-                        tripContext?.empresa ||
-                        operationConfiguration.empresa,
-
-                    empresa_id:
-                        tripContext?.empresa_id || null,
-
-                    ruta:
-                        tripContext?.ruta ||
-                        operationConfiguration.ruta,
-
-                    route_id:
-                        tripContext?.route_id || null,
-
-                    estado:
-                        estado,
-
-                    timestamp:
-                        new Date().toISOString(),
-
-                    trip_id:
-                        tripContext?.id ||
-                        tripIdFromUrl ||
-                        null,
-
-                    trip_context:
-                        tripContext
-
-                });
-
-
-            const viajeId =
-                trip.id;
-
-
-            // =========================================
-            // REPORTE
-            // =========================================
-
-            const report = {
-
-                conductor:
-                    resolvedConductor,
-
-                conductor_id:
-                    conductor_id || null,
-
-                patente:
-                    patente,
-
-                empresa:
-                    trip.empresa ||
-                    operationConfiguration.empresa,
-
-                ruta:
-                    trip.ruta ||
-                    operationConfiguration.ruta,
-
-                estado:
-                    estado,
-
-                incident_category:
-                    estado === "Incidente"
-                        ? incidentCategory
-                        : null,
-
-                latitud:
-                    latitud
-                    ? Number(latitud)
-                    : null,
-
-                longitud:
-                    longitud
-                    ? Number(longitud)
-                    : null,
-
-                precision_gps:
-                    precision
-                    ? Number(precision)
-                    : null,
-
-                google_maps:
-                    googleMaps ||
-                    null,
-
-                observacion:
-                    observacion ||
-                    null,
-
-                viaje_id:
-                    viajeId
-
-            };
-
-
-            // =========================================
-            // INSERTAR REPORTE
-            // =========================================
-
-
-            const {
-
-                data,
-
-                error
-
-            } =
-                await supabaseClient
-
-                    .from("reportes")
-
-                    .insert([
-                        report
-                    ])
-
-                    .select();
-
-
-            if(error){
-
-                throw new Error(
-                    "Supabase: " +
-                    error.message
-                );
-
-            }
-
-
-            // =========================================
-            // FINALIZACIÓN
-            // =========================================
-            // La finalización real requiere autorización de torre.
-            // El flujo público no debe cerrar un viaje arbitrariamente.
-            // =========================================
-
-            if(
-                estado ===
-                "Finalizado" &&
-                !tripIdFromUrl
-            ){
-
-                console.warn(
-                    "FLEETOPS: el viaje no se finaliza automáticamente; la torre debe autorizarlo."
-                );
-
-            }
-
-
-            // =========================================
-            // SUCCESS
-            // =========================================
-
-
-            window.location.replace(
-                "success.html"
+            // Sin ?viaje= no hay reporte: el único camino de escritura es
+            // submit_driver_report (valida viaje, patente y organización).
+            // Ya no se leen conductores ni se insertan viajes/reportes directo.
+            throw new Error(
+                "Escanea el QR del viaje entregado por la torre de control para reportar."
             );
 
         }
