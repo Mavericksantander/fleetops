@@ -186,22 +186,10 @@ function getTripIdFromUrl(){
 
 function getStoredDriverId(){
 
-    const queryDriverId =
+    return normalizeDriverId(
         new URLSearchParams(window.location.search)
-            .get("driver_id");
-
-    if(queryDriverId){
-        return normalizeDriverId(queryDriverId);
-    }
-
-    try{
-        return normalizeDriverId(
-            localStorage.getItem("fleetops.driver_id")
-        );
-    }
-    catch(error){
-        return "";
-    }
+            .get("driver_id")
+    );
 
 }
 
@@ -423,20 +411,21 @@ const driverIdInput =
 const conductorInput =
     fleetForm.elements["conductor"];
 
-try{
-    const storedDriverName =
-        localStorage.getItem("fleetops.driver_name");
+const openedTripId =
+    getTripIdFromUrl();
 
-    if(conductorInput && storedDriverName){
-        conductorInput.value = storedDriverName;
-        conductorInput.readOnly = true;
-    }
-}
-catch(error){
-    console.warn(
-        "FLEETOPS: no fue posible recuperar el nombre local",
-        error
-    );
+if(conductorInput && openedTripId){
+
+    getTripById(openedTripId)
+        .then(function(trip){
+
+            if(trip?.conductor){
+                conductorInput.value =
+                    trip.conductor;
+            }
+
+        });
+
 }
 
 const initialDriverId =
@@ -924,7 +913,7 @@ fleetForm.addEventListener(
             // DATOS
             // =========================================
 
-            const conductor =
+            let conductor =
                 fleetForm.elements["conductor"]
                     .value
                     .trim();
@@ -984,6 +973,16 @@ fleetForm.addEventListener(
                     tripContext.empresa || "";
                 fleetForm.elements["ruta"].value =
                     tripContext.ruta || "";
+
+                if(tripContext.conductor){
+                    conductor =
+                        String(tripContext.conductor).trim();
+
+                    if(conductorInput){
+                        conductorInput.value =
+                            conductor;
+                    }
+                }
             }
 
             const estado =
@@ -1084,40 +1083,28 @@ fleetForm.addEventListener(
 
             if(tripIdFromUrl){
 
-                const submitted =
-                    await submitDriverReport({
-                        viajeId: tripIdFromUrl,
-                        estado,
-                        patente,
-                        driverId,
-                        rut,
-                        telefono,
-                        conductor,
-                        incidentCategory:
-                            estado === "Incidente"
-                                ? incidentCategory
-                                : null,
-                        latitud,
-                        longitud,
-                        precision,
-                        googleMaps,
-                        observacion
-                    });
-
-                try{
-                    if(submitted?.driver_id){
-                        localStorage.setItem("fleetops.driver_id", submitted.driver_id);
-                    }
-                    if(submitted?.conductor){
-                        localStorage.setItem("fleetops.driver_name", submitted.conductor);
-                    }
-                }
-                catch(storageError){
-                    console.warn("FLEETOPS: no fue posible guardar identidad local", storageError);
-                }
+                await submitDriverReport({
+                    viajeId: tripIdFromUrl,
+                    estado,
+                    patente,
+                    driverId,
+                    rut,
+                    telefono,
+                    conductor,
+                    incidentCategory:
+                        estado === "Incidente"
+                            ? incidentCategory
+                            : null,
+                    latitud,
+                    longitud,
+                    precision,
+                    googleMaps,
+                    observacion
+                });
 
                 window.location.replace(
-                    "success.html"
+                    "success.html?viaje=" +
+                    encodeURIComponent(tripIdFromUrl)
                 );
 
                 return;

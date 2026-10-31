@@ -256,6 +256,19 @@ PRÆTOR TECHNOLOGIES
 </div>
 
 
+<script>
+(function () {
+    var viaje = (new URLSearchParams(window.location.search).get("viaje") || "").trim();
+    var link = document.querySelector("a.button");
+
+    if (!link || !viaje) {
+        return;
+    }
+
+    link.href = "reportes.html?viaje=" + encodeURIComponent(viaje);
+})();
+</script>
+
 </body>
 
 </html>
