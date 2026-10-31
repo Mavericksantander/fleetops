@@ -106,7 +106,7 @@ begin
          'anon perdió get_member_invite_context';
   assert has_function_privilege('anon', 'public.get_customer_member_invite_context(text)', 'execute'),
          'anon perdió get_customer_member_invite_context';
-  assert not has_function_privilege('anon', 'public.create_member_invite(text,text)', 'execute'),
+  assert not has_function_privilege('anon', 'public.create_member_invite(uuid,text,text)', 'execute'),
          'anon ejecuta create_member_invite';
 
   select count(*) into n from pg_default_acl where defaclnamespace = 0;
