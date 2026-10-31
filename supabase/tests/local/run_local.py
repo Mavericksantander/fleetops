@@ -17,6 +17,7 @@ if not skip:
     files.append(root/'tests/tractos_insert_returning_test.sql')
     files.append(root/'tests/report_identity_tracto_invite_test.sql')
     files.append(root/'tests/tracto_org_two_tenants_test.sql')
+    files.append(root/'tests/viajes_cross_org_binding_test.sql')
 with psycopg.connect(sys.argv[1], autocommit=True) as c:
     c.add_notice_handler(lambda d: print('  NOTICE:', d.message_primary))
     for f in files:
