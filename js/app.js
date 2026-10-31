@@ -977,6 +977,13 @@ fleetForm.addEventListener(
             const tripIdFromUrl =
                 getTripIdFromUrl();
 
+            if(!tripIdFromUrl){
+                alert("Escanea el QR del viaje entregado por la torre de control para reportar.");
+                submitButton.disabled = false;
+                submitButton.innerText = "ENVIAR ACTUALIZACIÓN";
+                return;
+            }
+
             const tripContext =
                 tripIdFromUrl
                     ? await getTripById(tripIdFromUrl)
@@ -1125,18 +1132,6 @@ fleetForm.addEventListener(
 
             }
 
-            const {
-                data: sessionData
-            } =
-                await supabaseClient.auth.getSession();
-
-            if(!sessionData?.session){
-                throw new Error(
-                    "Escanea el QR del viaje entregado por la torre de control para reportar."
-                );
-            }
-
-            // =========================================
             // IDENTIFICAR CONDUCTOR
             // =========================================
 
@@ -1353,6 +1348,12 @@ fleetForm.addEventListener(
 
             window.location.replace(
                 successHref()
+=======
+            // Sin ?viaje= no hay reporte: el único camino de escritura es
+            // submit_driver_report (valida viaje, patente y organización).
+            // Ya no se leen conductores ni se insertan viajes/reportes directo.
+            throw new Error(
+                "Escanea el QR del viaje entregado por la torre de control para reportar."
             );
 
         }

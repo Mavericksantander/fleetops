@@ -184,6 +184,22 @@ function escapeHTML(value) {
 
 }
 
+// google_maps lo escribe el conductor y la RPC solo limita el largo.
+function mapsHref(latitud, longitud) {
+
+    const latitude = Number(latitud);
+    const longitude = Number(longitud);
+    const hasCoordinates = latitud != null &&
+        longitud != null &&
+        Number.isFinite(latitude) &&
+        Number.isFinite(longitude);
+
+    return hasCoordinates
+        ? `https://www.google.com/maps?q=${latitude},${longitude}`
+        : "";
+
+}
+
 // =====================================================
 // CLASE CSS DEL ESTADO
 // =====================================================
@@ -776,49 +792,24 @@ function createUnitCard(unit) {
             : "";
 
 
+    const mapsURL =
+        mapsHref(
+            unit.latitud,
+            unit.longitud
+        );
+
     let mapsButton = "";
 
 
-    if (unit.google_maps) {
+    if (mapsURL) {
 
         mapsButton = `
 
             <a
                 class="maps-button"
                 href="${escapeHTML(
-                    unit.google_maps
+                    mapsURL
                 )}"
-                target="_blank"
-                rel="noopener noreferrer">
-
-                VER EN GOOGLE MAPS
-
-            </a>
-
-        `;
-
-    }
-
-    else if (
-        unit.latitud !== null &&
-        unit.latitud !== undefined &&
-        unit.longitud !== null &&
-        unit.longitud !== undefined
-    ) {
-
-        const mapsURL =
-            `https://www.google.com/maps?q=${encodeURIComponent(
-                unit.latitud
-            )},${encodeURIComponent(
-                unit.longitud
-            )}`;
-
-
-        mapsButton = `
-
-            <a
-                class="maps-button"
-                href="${mapsURL}"
                 target="_blank"
                 rel="noopener noreferrer">
 
@@ -1344,10 +1335,6 @@ function buildUnits(
                     latestReport?.precision_gps ??
                     null,
 
-                google_maps:
-                    latestReport?.google_maps ??
-                    null,
-
                 observacion:
                     latestReport?.observacion ??
                     null,
@@ -1521,7 +1508,6 @@ async function loadReports(tripIds) {
                 latitud,
                 longitud,
                 precision_gps,
-                google_maps,
                 observacion,
                 timestamp,
                 created_at
